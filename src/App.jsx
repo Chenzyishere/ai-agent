@@ -9,6 +9,7 @@ export default function App() {
     <BrowserRouter>
         <Routes>
           <Route index element={<Homepage/>}/>
+          <Route path="HomePage" element={<Homepage/>}/>
           <Route path="ChatPage" element={<ChatPage/>}/>
         </Routes>
     </BrowserRouter>
