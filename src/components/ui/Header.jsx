@@ -64,7 +64,7 @@ const Header = () => {
     if (element) {
       const { rgb } = getActualBgColor(element);
       const brightness = getBrightness(rgb);
-      setIsLightBg(brightness > 150);
+      setIsLightBg(brightness > 100);
     }
     
     // 2. 检测滚动方向（控制显示/隐藏）

@@ -44,10 +44,10 @@ body {
 /* global.css 或 styles.css */
 @keyframes gradient-flow {
   0%, 100% {
-    background-position: 0% 50%;
+    background-position: 0% 40%;
   }
-  50% {
-    background-position: 100% 50%;
+  40% {
+    background-position: 100% 40%;
   }
 }
 

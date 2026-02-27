@@ -110,13 +110,13 @@ const ChatInput = ({ loading = false, onSend }) => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-1/2 w-5xl -translate-x-1/2 rounded-3xl border border-white/30 bg-white/30 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300">
+    <div className="fixed bottom-2 left-1/2 w-5xl max-w-4/5 -translate-x-1/2 rounded-3xl border border-white/30 bg-white/30 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300">
       {/* 输入框 */}
       <textarea
         ref={textareaRef}
         placeholder="输入消息,Enter发送,Shift+Enter换行，最大行数为6"
         onKeyDown={handleKeyDown}
-        rows={4}
+        rows={1}
         className='w-full focus:border-none p-3'
       />
       {/* 底部工具框 */}
