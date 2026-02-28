@@ -64,7 +64,7 @@ const Header = () => {
     if (element) {
       const { rgb } = getActualBgColor(element);
       const brightness = getBrightness(rgb);
-      setIsLightBg(brightness > 150);
+      setIsLightBg(brightness > 100);
     }
     
     // 2. 检测滚动方向（控制显示/隐藏）
@@ -164,7 +164,7 @@ const Header = () => {
             
             {/* 导航 */}
             <nav className="flex items-center gap-10">
-              <a href="#" className={`transition-all duration-300 relative group ${navColorClass}`}>
+              <a href="/HomePage" className={`transition-all duration-300 relative group ${navColorClass}`}>
                 HomePage
                 <span className={`absolute -bottom-1 left-0 w-0 h-px 
                                group-hover:w-full transition-all duration-300 
