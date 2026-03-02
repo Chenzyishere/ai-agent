@@ -1,5 +1,5 @@
 import React, { useState, useEffect,useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,Link } from 'react-router-dom';
 
 const Header = () => {
   const [isLightBg, setIsLightBg] = useState(false);
@@ -164,18 +164,18 @@ const Header = () => {
             
             {/* 导航 */}
             <nav className="flex items-center gap-10">
-              <a href="/HomePage" className={`transition-all duration-300 relative group ${navColorClass}`}>
+              <Link to="HomePage" className={`transition-all duration-300 relative group ${navColorClass}`}>
                 HomePage
                 <span className={`absolute -bottom-1 left-0 w-0 h-px 
                                group-hover:w-full transition-all duration-300 
                                ${underlineColorClass}`}></span>
-              </a>
-              <a href="#" className={`transition-all duration-300 relative group ${navColorClass}`}>
+              </Link>
+              <Link to="#" className={`transition-all duration-300 relative group ${navColorClass}`}>
                 Profile
                 <span className={`absolute -bottom-1 left-0 w-0 h-px 
                                group-hover:w-full transition-all duration-300 
                                ${underlineColorClass}`}></span>
-              </a>
+              </Link>
             </nav>
             
             {/* CTA 按钮 */}
