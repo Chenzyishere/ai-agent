@@ -6,7 +6,7 @@ import { Image, Button } from 'antd';
 import Footer from '@/components/ui/Footer';
 import GradientButton from '@/components/ui/GradientButton';
 import PirateIcon from '@/components/icons/PirateIcon';
-
+import { Link } from 'react-router-dom';
 export default function Homepage() {
   return (
     <>
@@ -16,11 +16,10 @@ export default function Homepage() {
           Talk to the Agent
         </h1>
         <GradientButton
-          href="/ChatPage"
           size="large"
           className="absolute top-[83%] left-[10%] z-10 -translate-y-1/2"
         >
-          Start right now
+          <Link to="ChatPage">Start right now</Link>
         </GradientButton>
       </div>
       
