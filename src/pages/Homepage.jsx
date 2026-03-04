@@ -19,7 +19,7 @@ export default function Homepage() {
           size="large"
           className="absolute top-[83%] left-[10%] z-10 -translate-y-1/2"
         >
-          <Link to="ChatPage">Start right now</Link>
+          <Link to="/ChatPage">Start right now</Link>
         </GradientButton>
       </div>
       
