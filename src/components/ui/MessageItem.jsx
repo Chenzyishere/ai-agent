@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, computed } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { renderMarkdown } from '@/utils/markdown.js';
 import {
   InboxOutlined,
@@ -10,37 +10,72 @@ import {
   LikeOutlined,
   DislikeOutlined,
 } from '@ant-design/icons';
+import { useChatStore } from '@/store/useChatStore';
 
-// @param {Object} message; -消息对象{role,content,files,loading,reasoning_content,completion_tokens,speed}
-// @param {boolean} isLastAssistantMessage -是否为最后一条AI信息
-// @param {function} onRegenerate -重新生成回调
+/**
+ * @param {Object} props
+ * @param {Object} props.message - 消息对象 {role, content, files, loading, reasoning_content, completion_tokens, speed}
+ * @param {boolean} props.isLastAssistantMessage - 是否为最后一条 AI 信息 (用于显示重新生成按钮)
+ * @param {function} props.onRegenerate - 重新生成回调 (如果未提供，则使用 Store 中的默认逻辑)
+ */
 
 const MessageItem = ({
   message,
   isLastAssistantMessage = false,
   onRegenerate,
 }) => {
-  // 状态管理
+  if (!message) {
+    return null;
+  }
+
+  // 确保 content 和 role 有默认值，防止 undefined 参与运算
+  const safeMessage = {
+    role: message.role || 'assistant',
+    content: message.content || '',
+    reasoning_content: message.reasoning_content || '',
+    loading: message.loading || false,
+    files: message.files || [],
+    completion_tokens: message.completion_tokens,
+    speed: message.speed,
+    id: message.id,
+  };
+
+  // 1.本地状态
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isReasoningExpanded, setIsReasoningExpanded] = useState(true);
 
+  // 2.引用
   const contentRef = useRef(null);
 
-  // 计算属性
-  const renderedContent = renderMarkdown(message.content || '')
-  const renderedReasoning = message.reasoning_content ? renderMarkdown(message.reasoning_content) : ''
-  // const renderedContent = ' this is markdown content';
-  // const renderedReasoning = 'this is reasoning';
+  // 3，引入Zustand Store(用于全局操作)
+  const currentConversationId = useChatStore(
+    (state) => state.currentConversationId,
+  );
+  const addMessage = useChatStore((state) => state.addMessage);
+  const updateLastMessage = useChatStore((state) => state.updateLastMessage);
+  const setIsLoading = useChatStore((state) => state.setIsLoading);
 
+  // 如果需要从store删除某条消息，可以在store中增加deleteMessage动作，或者在这里处理
+
+  // 4.计算属性(直接变量赋值)
+
+  const renderedContent = renderMarkdown(safeMessage.content);
+  const renderedReasoning = message.reasoning_content
+    ? renderMarkdown(safeMessage.reasoning_content)
+    : '';
+  const isUser = message.role === 'user';
+  const isAssistantLoading = message.loading && message.role === 'assistant';
+
+  // 5.事件处理
   // 切换深度思考展开/折叠
   const toggleReasoning = () => {
     setIsReasoningExpanded((prev) => !prev);
   };
 
-  // 处理代码块复制
-  const handleCodeCopy = async (event) => {
+  // 处理代码块复制 (委托事件)
+  const handleCodeCopy = useCallback((event) => {
     const copyBtn = event.currentTarget;
     const codeBlock = copyBtn.closest('.code-block');
     if (!codeBlock) return;
@@ -48,19 +83,18 @@ const MessageItem = ({
     const codeElement = codeBlock.querySelector('pre code');
     if (!codeElement) return;
 
-    try {
-      await navigator.clipboard.writeText(codeElement.textContent);
-      // 可以在这里添加一个短暂的 "已复制" 提示反馈
-      const originalIcon = copyBtn.querySelector('img').src;
-      // 模拟成功图标切换 (可选)
-      // copyBtn.querySelector('img').src = successIcon
-      setTimeout(() => {
-        // copyBtn.querySelector('img').src = originalIcon
-      }, 2000);
-    } catch (err) {
-      console.error('复制失败:', err);
-    }
-  };
+    navigator.clipboard
+      .writeText(codeElement.textContent)
+      .then(() => {
+        // 简单的视觉反馈
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span class="text-green-500">已复制!</span>';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalHTML;
+        }, 2000);
+      })
+      .catch((err) => console.error('复制失败:', err));
+  }, []);
 
   // 处理整体消息复制
   const handleCopy = async () => {
@@ -141,70 +175,89 @@ const MessageItem = ({
     };
   }, [renderedContent, renderedReasoning]); // 依赖内容渲染完成
 
-  // const isUser = message.role === 'user'
-  const isUser = 'user';
-  // const isAssistantLoading = message.loading && message.role === 'assistant'
-  const isAssistantLoading = false;
-
   return (
-    <div>
-      {/* 加载中状态 */}
-      {isAssistantLoading && (
-      <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-500">
-        <span>内容生成中...</span>
-      </div>
-      )}
-
-      {/* 深度思考开关 */}
-      {!isAssistantLoading &&(
+    <div
+      className={`group relative mb-8 flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}
+    >
+      {/* 3. 内容区域容器 */}
+      {/* 用户：最大宽度限制，靠右 (ml-auto) */}
+      {/* AI：最大宽度限制，靠左 (mr-auto) */}
       <div
-        onClick={toggleReasoning}
-        className="mb-2 ml-4 flex w-fit cursor-pointer items-center gap-1 rounded bg-blue-50 px-2 py-1 transition-colors hover:bg-blue-100"
+        className={`relative flex max-w-[85%] flex-col ${isUser ? 'ml-12 items-end' : 'mr-12 items-start'}`}
       >
-        {/* <img src={thinkingIcon} alt="thinking" className="h-3.5 w-3.5" /> */}
-        <span className="text-sm text-blue-600">深度思考</span>
-        <span
-          className={`text-xs text-blue-600 transition-transform duration-200 ${isReasoningExpanded ? 'rotate-180' : ''}`}
+        {/* 加载中状态 */}
+        {isAssistantLoading && (
+          <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-500">
+            <span>内容生成中...</span>
+          </div>
+        )}
+
+        {/* 深度思考开关 */}
+        {!isUser && !isAssistantLoading && safeMessage.reasoning_content && (
+          <div
+            onClick={toggleReasoning}
+            className="mb-2 ml-4 flex w-fit cursor-pointer items-center gap-1 rounded bg-blue-50 px-2 py-1 transition-colors hover:bg-blue-100"
+          >
+            {/* <img src={thinkingIcon} alt="thinking" className="h-3.5 w-3.5" /> */}
+            <span className="text-sm text-blue-600">深度思考</span>
+            <span
+              className={`text-xs text-blue-600 transition-transform duration-200 ${isReasoningExpanded ? 'rotate-180' : ''}`}
+            >
+              ▼
+            </span>
+          </div>
+        )}
+
+        {/* 深度思考内容 */}
+        {!isUser && isReasoningExpanded && !isAssistantLoading && (
+          <div className="markdown-body mb-2 border-l-4 border-gray-100 px-4 py-0 text-sm leading-relaxed text-gray-100">
+            <div
+              className="markdown-body prose prose-sm prose-indigo max-w-none"
+              dangerouslySetInnerHTML={{ __html: renderedReasoning }}
+            />
+          </div>
+        )}
+
+        {/* --- 4. 消息主体气泡 (关键修改处) --- */}
+        <div
+          className={`relative w-fit overflow-hidden rounded-2xl p-4 text-base leading-relaxed wrap-break-word shadow-sm ${
+            isUser
+              ? 'rounded-br-none bg-blue-600 text-white' // 用户：蓝色，右下角切角可选
+              : 'rounded-bl-none border border-gray-100 bg-white text-gray-800' // AI：白色，左下角切角可选
+          }`}
         >
-          ▼
-        </span>
-      </div>
-      )}
-
-      {/* 深度思考内容 */}
-      {isReasoningExpanded && !isAssistantLoading && (
-      <div className="markdown-body mb-2 ml-4 border-l-4 border-gray-300 bg-white px-4 py-0 text-sm leading-relaxed text-gray-500" >
-        This is the reasoning bubble
-      </div>)}
-
-      {/* 消息主体气泡 */}
-      {!isAssistantLoading && (
-      <div
-        className={`markdown-body block w-full overflow-hidden rounded-2xl p-3 text-base leading-relaxed wrap-break-word`}
-      >
-        this is the main bubble!
-        {/* 操作按钮区域 */}
-        <div className="mt-2 flex items-center gap-2 pl-4">
-          <button>
-            <ReloadOutlined />
-            <span className='hidden'>Regenerate</span>
-          </button>
-          <button>
-            <CopyOutlined />
-            <span className='hidden'>Copy</span>
-          </button>
-          <button>
-            <LikeOutlined />
-            <span className='hidden'>Like</span>
-          </button>
-          <button>
-            <DislikeOutlined />
-            <span className='hidden'>Dislike</span>
-          </button>
-          <span>tokens:,Speed:</span>
+          {/* 渲染 Markdown 内容 */}
+          <div
+            ref={contentRef}
+            className={`markdown-body max-w-none ${
+              isUser ? 'prose-invert' : 'prose'
+            }`}
+            dangerouslySetInnerHTML={{ __html: renderedContent }}
+          />
+          {/* 操作按钮区域 */}
+          {!isUser && (
+            <div className="mt-2 flex items-center gap-2 pl-4">
+              <button>
+                <ReloadOutlined />
+                <span className="hidden">Regenerate</span>
+              </button>
+              <button>
+                <CopyOutlined />
+                <span className="hidden">Copy</span>
+              </button>
+              <button>
+                <LikeOutlined />
+                <span className="hidden">Like</span>
+              </button>
+              <button>
+                <DislikeOutlined />
+                <span className="hidden">Dislike</span>
+              </button>
+              <span>tokens:,Speed:</span>
+            </div>
+          )}
         </div>
       </div>
-      )}
     </div>
   );
 };
