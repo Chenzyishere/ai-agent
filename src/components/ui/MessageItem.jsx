@@ -10,7 +10,7 @@ import {
   LikeOutlined,
   DislikeOutlined,
 } from '@ant-design/icons';
-import { useChatStore } from '@/store/useChatStore';
+import { useChatStore } from '@/stores/useChatStore';
 
 /**
  * @param {Object} props

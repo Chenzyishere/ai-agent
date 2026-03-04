@@ -1,6 +1,6 @@
 import React from 'react'
 import MessageItem from '@/components/ui/MessageItem'
-import { useChatStore } from '@/store/useChatStore'
+import { useChatStore } from '@/stores/useChatStore'
 export default function ChatContainer() {
   // 1.从Zustand获取状态和方法
 
