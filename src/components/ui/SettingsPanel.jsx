@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo,useRef } from 'react';
 import { useSettingsStore, modelOptions } from '@/stores/useSettingsStore';
 import { 
   X, 
@@ -55,21 +55,13 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     }
   }, [settings.model, settings.maxTokens, updateSettings]);
 
-  if (!isOpen) return null;
 
   return (
-    <>
-    
-      {/* <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-0 transition-opacity"
-        onClick={onClose}
-      /> */}
-
-      
+    <>      
       {/* 抽屉面板 */}
       <div 
-        className={`fixed top-1/6 right-2 h-1/2 w-1/7 overflow-hidden rounded-2xl border border-white/30 bg-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300 ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed top-1/6 right-0 h-1/2 w-1/7 overflow-hidden rounded-2xl border border-white/30 bg-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transform transition-transform duration-300 ease-in-out flex flex-col ${
+          isOpen ? 'translate-x-0 right-2' : 'translate-x-full'
         }`}
       >
         {/* 头部 */}

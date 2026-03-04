@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Settings } from 'lucide-react'; // 或者其他打开按钮
-const Header = () => {
+import { Settings, History } from 'lucide-react'; // 或者其他打开按钮
+const Header = ({
+  isSettingsOpen,
+  isHistoryOpen,
+  toggleSettings,
+  toggleHistory,
+}) => {
   const [isLightBg, setIsLightBg] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollYRef = useRef(0);
-   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const navigate = useNavigate();
 
   // ==================== 工具函数 ====================
@@ -76,18 +80,6 @@ const Header = () => {
       setIsLightBg(brightness > 100);
     }
 
-    // 2. 检测滚动方向（控制显示/隐藏）
-
-    // 2. 检测滚动方向（控制显示/隐藏）
-    console.log(
-      'current:',
-      currentScrollY,
-      'last:',
-      lastScrollY,
-      'isVisible:',
-      isVisible,
-    );
-
     if (currentScrollY > lastScrollY && currentScrollY > 100) {
       // 向下滚动且超过 80px → 隐藏
       setIsVisible(false);
@@ -149,7 +141,6 @@ const Header = () => {
   const underlineColorClass = isLightBg ? 'bg-gray-900' : 'bg-white';
 
   const HeaderisVisible = isVisible ? '' : '-translate-y-full';
-  // ==================== 渲染 ====================
 
   return (
     <header
@@ -165,25 +156,17 @@ const Header = () => {
           ></div>
 
           {/* 内容层 */}
-          <div className="relative flex w-full items-center justify-between p-2">
+          <div className="relative flex w-full items-center justify-between px-5 py-1">
             {/* Logo */}
+
             <h1
-              className={`text-xl font-bold tracking-wider uppercase transition-colors duration-300 ${textColorClass}`}
+              className={`cursor-pointer text-xl font-bold tracking-wider uppercase transition-colors duration-300 ${textColorClass}`}
             >
-              Chenzyishere
+              <Link to="/HomePage">AI-AGENT PRO</Link>
             </h1>
 
             {/* 导航 */}
             <nav className="flex items-center gap-10">
-              <Link
-                to="/HomePage"
-                className={`group relative transition-all duration-300 ${navColorClass}`}
-              >
-                HomePage
-                <span
-                  className={`absolute -bottom-1 left-0 h-px w-0 transition-all duration-300 group-hover:w-full ${underlineColorClass}`}
-                ></span>
-              </Link>
               <Link
                 to="#"
                 className={`group relative transition-all duration-300 ${navColorClass}`}
@@ -193,23 +176,65 @@ const Header = () => {
                   className={`absolute -bottom-1 left-0 h-px w-0 transition-all duration-300 group-hover:w-full ${underlineColorClass}`}
                 ></span>
               </Link>
+              <Link
+                to="#"
+                className={`group relative transition-all duration-300 ${navColorClass}`}
+              >
+                Blog
+                <span
+                  className={`absolute -bottom-1 left-0 h-px w-0 transition-all duration-300 group-hover:w-full ${underlineColorClass}`}
+                ></span>
+              </Link>
+              <Link
+                to="#"
+                className={`group relative transition-all duration-300 ${navColorClass}`}
+              >
+                Learn More
+                <span
+                  className={`absolute -bottom-1 left-0 h-px w-0 transition-all duration-300 group-hover:w-full ${underlineColorClass}`}
+                ></span>
+              </Link>
             </nav>
 
-            {/* CTA 按钮 */}
-            <button
-              className={`cursor-pointer rounded-full px-5 py-2 font-semibold transition-all duration-300 hover:scale-105 ${buttonClass}`}
-            >
-              Learn More
-            </button>
-
-            <div className="p-4">
-              {/* 触发按钮 */}
+            <div className="flex justify-between">
+              {/* 登录/注册按钮 */}
               <button
-                onClick={() => setIsSettingsOpen(true)}
-                className="flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2 text-white transition hover:bg-gray-700"
+                onClick={toggleHistory}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                  isHistoryOpen
+                    ? 'bg-white/20 text-white shadow-inner'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`}
               >
-                <Settings className="h-4 w-4" />
-                打开设置
+                登录
+              </button>
+              {/* 历史记录按钮 */}
+              <button
+                onClick={toggleHistory}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                  isHistoryOpen
+                    ? 'bg-white/20 text-white shadow-inner'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <History
+                  className={`h-5 w-5 ${isSettingsOpen ? 'animate-spin-slow' : ''}`}
+                />
+                历史记录
+              </button>
+              {/* 设置按钮 */}
+              <button
+                onClick={toggleSettings}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                  isSettingsOpen
+                    ? 'bg-white/20 text-white shadow-inner'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <Settings
+                  className={`h-5 w-5 ${isSettingsOpen ? 'animate-spin-slow' : ''}`}
+                />
+                设置
               </button>
             </div>
           </div>

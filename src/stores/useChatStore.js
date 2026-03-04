@@ -1,4 +1,4 @@
-//src/store/useChatStore.js
+//src/stores/useChatStore.js
 import { message } from 'antd';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
