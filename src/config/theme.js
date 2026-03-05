@@ -1,4 +1,4 @@
-// src/config/theme.ts
+// src/config/theme.js
 export const antdTheme = {
   token: {
     colorPrimary: '#1677ff',

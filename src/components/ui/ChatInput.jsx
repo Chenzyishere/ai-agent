@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState} from 'react';
 import { X, FileText, Image as ImageIcon } from 'lucide-react';
 import {
   InboxOutlined,
@@ -12,7 +12,7 @@ const { TextArea } = Input;
 const { Dragger } = Upload;
 
 // ChatInput组件
-const ChatInput = ({ loading = false, onSend }) => {
+const ChatInput = ({ loading, onSend }) => {
   const navigate = useNavigate();
   const textareaRef = useRef(null);
 
@@ -20,11 +20,28 @@ const ChatInput = ({ loading = false, onSend }) => {
   const [inputValue, setInputValue] = useState('');
   const [fileList, setFileList] = useState([]);
 
+  // 引用file input 元素以变编程式出发点击
+  const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
+
+  // 处理发送信息
   const handleSend = () => {
-    console.log(123);
+    const trimmedText = inputValue.trim();
+    if((!trimmedText && fileList.length === 0 ) || loading) return;
+
+    // 构建消息对象
+    const messageContent = {
+      text:trimmedText,
+      files:[...fileList],//复制一份文件列表
+    };
+
+    onSend(messageContent);
+    // 清空状态
+    setInputValue('');
+    setFileList([]);
+
   };
   const handleNewline = (e) => {
-    console.log(e);
     e.preventDefault();
     setInputValue((prev) => prev + '/n');
   };
@@ -113,20 +130,25 @@ const ChatInput = ({ loading = false, onSend }) => {
     <div className="fixed bottom-2 left-1/2 w-7xl max-w-4/5 -translate-x-1/2 rounded-3xl border border-white/30 bg-white/30 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300">
       {/* 输入框 */}
       <textarea
-        ref={textareaRef}
-        placeholder="输入消息,Enter发送,Shift+Enter换行，最大行数为6"
+        value={inputValue}
+        onChange={(e)=>setInputValue(e.target.value)}
+        placeholder="输入消息,Enter发送,Shift+Enter换行,最大行数为6"
         onKeyDown={handleKeyDown}
         rows={1}
-        className='w-full focus:border-none p-3'
+        className="w-full bg-transparent border-none resize-none outline-none text-white placeholder-gray-100 min-h-6 max-h-37.5 overflow-y-auto custom-scrollbar"
+        style={{
+          minHeight: '1.5rem',
+          maxHeight: '9rem',
+          fieldSizing: 'content' }}
       />
       {/* 底部工具框 */}
       <div className="file flex h-auto w-full justify-end gap-4 border-none pt-4">
-        <Dropdown menu={{ items }} placement="top" className="pt-4">
-          <button>
+        <Dropdown menu={{ items }} placement="top" className="pt-4 bg-transparent">
+          <button className='cursor-pointer'>
             <PaperClipOutlined />
           </button>
         </Dropdown>
-        <button>
+        <button className='cursor-pointer' onClick={handleSend}>
           <SendOutlined />
         </button>
       </div>
