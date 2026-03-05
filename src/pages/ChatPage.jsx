@@ -3,11 +3,29 @@ import ChatInput from '@/components/ui/ChatInput';
 import Header from '@/components/ui/Header';
 import ChatContainer from '@/components/ui/ChatContainer';
 import SettingsPanel from '@/components/ui/SettingsPanel';
-import { Settings } from 'lucide-react'; // 或者其他打开按钮
+import { Settings } from 'lucide-react';
 import HistoryChat from '@/components/ui/HistoryChat';
+import { useChatStore } from '@/stores/useChatStore';
 export default function ChatPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  const [isSending, setIsSending] = useState(false);
+  const chatStore = useChatStore();
+
+  const handleSendMessage = async (messageData) => {
+    console.log('发送信息', messageData);
+    setIsSending(true);
+    try {
+      // 调用api
+      await chatStore.addMessage(messageData);
+    } catch (error) {
+      console.log('用户消息发送失败', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
     <div className="flex h-screen w-screen flex-col">
       {/* 1. 独立背景层：应用模糊和渐变 */}
@@ -32,7 +50,7 @@ export default function ChatPage() {
 
         <div className="flex h-screen w-3/5 flex-col">
           <ChatContainer />
-          <ChatInput />
+          <ChatInput loading={isSending} onSend={handleSendMessage} />
         </div>
       </div>
     </div>
