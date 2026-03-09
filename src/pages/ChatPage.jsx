@@ -6,6 +6,8 @@ import SettingsPanel from '@/components/ui/SettingsPanel';
 import { Settings } from 'lucide-react';
 import HistoryChat from '@/components/ui/HistoryChat';
 import { useChatStore } from '@/stores/useChatStore';
+import { messageHandler } from '@/utils/messageHandler';
+messageHandler;
 export default function ChatPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -13,12 +15,36 @@ export default function ChatPage() {
   const [isSending, setIsSending] = useState(false);
   const chatStore = useChatStore();
 
-  const handleSendMessage = async (messageData) => {
-    console.log('发送信息', messageData);
+  const handleSendMessage = async (messageContent) => {
+    console.log('发送信息', messageContent);
     setIsSending(true);
     try {
-      // 调用api
-      await chatStore.addMessage(messageData);
+      //1.添加用户信息，先用messageHandler format一下
+      await chatStore.addMessage(
+        messageHandler.formatMessage(
+          'user',
+          messageContent.text,
+          '',
+          messageContent.files,
+        ),
+      );
+      //2.添加空的助手信息（占位）
+      chatStore.addMessage(
+        messageHandler.formatMessage('assistant', '', '', ''),
+      );
+      //3.设置loading状态
+      chatStore.setIsLoading(true);
+      //4.获取最后一条消息（刚创建的助手消息）并标记loading
+      const lastMessage = chatStore.getLastMessage();
+      if (lastMessage) lastMessage.loading = true;
+
+      console.log('2.Preparing API call');
+      //准备API参数
+      // 过滤不需要发送给后端的字段，只需要role和content
+      const messagesPayload = chatStore.currentMessages.map(({role,content})=>({
+        role,
+        content
+      }))
     } catch (error) {
       console.log('用户消息发送失败', error);
     } finally {
