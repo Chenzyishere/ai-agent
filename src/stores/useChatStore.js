@@ -17,34 +17,24 @@ export const useChatStore = create(
               content: '你好，我想把之前的 Pinia 项目重构为 Zustand，有什么建议吗？',
               timestamp: new Date(Date.now() - 100000).toISOString(),
             },
-            {
-              id: 'msg_2',
-              role: 'assistant',
-              content: '你好！Zustand 是一个非常棒的选择。它的 API 非常简洁，不需要像 Redux 那样写大量的样板代码。\n\n主要优势包括：\n1. **无需 Provider**：直接在组件中 hook 使用。\n2. **细粒度订阅**：组件只在自己关心的状态变化时重渲染。\n3. **中间件生态**：原生支持 `persist` 持久化。\n\n你需要我帮你重构具体的代码片段吗？',
-              reasoning_content: '用户询问从 Pinia 迁移到 Zustand 的建议。需要对比两者的异同，强调 Zustand 的轻量级和 hooks 特性。列出 3-4 个核心优势。',
-              completion_tokens: 128,
-              speed: 45.5,
-              timestamp: new Date(Date.now() - 90000).toISOString(),
-            },
-            {
-              id: 'msg_3',
-              role: 'user',
-              content: '好的，请帮我看看这个 MessageItem 组件怎么写。',
-              timestamp: new Date(Date.now() - 50000).toISOString(),
-            },
-            {
-              id: 'msg_4',
-              role: 'assistant',
-              content: '没问题。这是基于 Zustand 的 `MessageItem` 组件方案...\n\n```jsx\nconst MessageItem = ({ message }) => {\n  return <div>{message.content}</div>\n}\n```\n\n注意要处理好 markdown 渲染和代码高亮。',
-              loading: false,
-              timestamp: new Date().toISOString(),
-            },
           ],
         createdAt: Date.now(),
       },
     ],
     currentConversationId: '1',
     isLoading: false,
+
+    //获取当前对话，当前的对话信息
+    currentConversation:() => {
+      const state = get();
+      return state.conversations.find((conv) => conv.id === state.currentConversationId)
+    },
+    //获取当前对话信息
+    currentMessages:() => {
+      const conversation = get().currentConversation;
+      // 确保返回的是数组，如果找不到对话就返回空数组
+      return conversation ? conversation.messages : [];
+    },
 
     // 2.Actions
     // 对话管理，创建新对话
