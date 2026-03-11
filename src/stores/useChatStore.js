@@ -1,42 +1,23 @@
 //src/stores/useChatStore.js
-import { message } from 'antd';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 export const useChatStore = create(
   persist((set, get) => ({
     // 1.初始状态(state)
+    // 只存最基础的数据，不存任何可以通过计算得到的值
     conversations: [
       {
         id: '1',
         title: '日常问候',
-        messages: [
-            {
-              id: 'msg_1',
-              role: 'user',
-              content: '你好，我想把之前的 Pinia 项目重构为 Zustand，有什么建议吗？',
-              timestamp: new Date(Date.now() - 100000).toISOString(),
-            },
-          ],
+        messages: [],
         createdAt: Date.now(),
       },
     ],
     currentConversationId: '1',
     isLoading: false,
 
-    //获取当前对话，当前的对话信息
-    currentConversation:() => {
-      const state = get();
-      return state.conversations.find((conv) => conv.id === state.currentConversationId)
-    },
-    //获取当前对话信息
-    currentMessages:() => {
-      const conversation = get().currentConversation;
-      // 确保返回的是数组，如果找不到对话就返回空数组
-      return conversation ? conversation.messages : [];
-    },
-
-    // 2.Actions
+    // 2.动作(Actions)
     // 对话管理，创建新对话
     createConversation: () => {
       const newConversation = {
@@ -55,36 +36,33 @@ export const useChatStore = create(
     // [对话管理] 切换对话
     switchConversation: (id) => set({ currentConversationId: id }),
 
+    // [对话管理] 设置加载状态
+    setIsLoading:(loading) => set({isLoading:loading}),
+
     // [消息管理] 添加消息
     addMessage: (message) => {
-      set((state) => {
-        const convIndex = state.conversations.findIndex(
-          (c) => c.id === state.currentConversationId,
-        );
-        //如果对话的标识是-1就返回状态state
-        if (convIndex === -1) return state;
+      const {currentConversationId,conversations} = get();
+      if(!currentConversationId) return;
 
-        const newConversations = [...state.conversations];
-        const currentConv = newConversations[convIndex];
-
-        newConversations[convIndex] = {
-          ...currentConv,
-          messages: [
-            ...currentConv.messages,
-            {
-              id: Date.now(),
-              timestamp: new Date().toISOString(),
-              ...message, //role,content等
-            },
-          ],
-        };
-
-        return { conversations: newConversations };
-      });
+      set({
+        conversations:conversations.map((conversation)=>{
+          if(conversation.id === currentConversationId){
+            return {
+              ...conversation,
+              messages:[
+                ...conversation.messages,
+                {
+                  id:Date.now(),
+                  timestamp:new Date().toISOString(),
+                  ...message,
+                }
+              ]
+            };
+          }
+          return conversation;
+        })
+      })
     },
-
-    // [状态管理] 设置加载状态
-    setIsLoading: (value) => set({ isLoading: value }),
 
     // [消息管理] 更新最后一条消息（用于流式响应）
     updateLastMessage: (
@@ -100,10 +78,10 @@ export const useChatStore = create(
 
         if (convIndex === -1) return state;
 
-        const conv = state.conversations[convIndex];
-        if (!conv.messages || conv.messages.length === 0) return state;
+        const conversation = state.conversations[convIndex];
+        if (!conversation.messages || conversation.messages.length === 0) return state;
         // 不可变更新数组中的最后一个元素
-        const newMessages = [...conv.messages];
+        const newMessages = [...conversation.messages];
         const lastMsgIndex = newMessages.length - 1;
 
         newMessages[lastMsgIndex] = {
@@ -115,20 +93,21 @@ export const useChatStore = create(
         };
 
         const newConversations = [...state.conversations];
-        newConversations[convIndex] = { ...conv, messages: newMessages };
+        newConversations[convIndex] = { ...conversation, messages: newMessages };
 
         return { conversations: newConversations };
       });
     },
 
+
     // [消息管理] 获取最后一条消息(Helper)
     getLastMessage: () => {
       const state = get();
-      const conv = state.conversations.find(
+      const conversation = state.conversations.find(
         (c) => c.id === state.currentConversationId,
       );
-      return conv?.messages?.length
-        ? conv.messages[conv.messages.length - 1]
+      return conversation?.messages?.length
+        ? conversation.messages[conversation.messages.length - 1]
         : null;
     },
 

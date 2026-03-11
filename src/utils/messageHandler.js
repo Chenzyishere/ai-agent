@@ -1,3 +1,5 @@
+import { data } from "react-router";
+
 export const messageHandler = {
   formatMessage(role, content, reasoning_content = '', files = []) {
     return {
@@ -14,27 +16,54 @@ export const messageHandler = {
 
   // 统一的响应处理函数
   async handleResponse(response, isStream, updateCallback) {
-    if (!response || !response.body) {
-      console.log(
-        'handleResponese,Response or response.body is updefined',
-        response,
-      );
+    if(!response){
+      console.error('handleResponse:Response object is missing');
+      throw new Error('No response received from API')
     }
+
     if (isStream) {
-      await this.handleStreamResponse(response, updateCallback);
+      this.handleStreamResponse(response, updateCallback);
     } else {
+      // 非流式响应直接传入response对象
       this.handleNormalResponse(response, updateCallback);
     }
   },
 
   // 处理非流式响应
   // 全部直接回调
-  handleNormalResponse(response, updateCallback) {
+  handleNormalResponse(data, updateCallback) {
+    // 1.安全检查：检查choices是否存在且不为空
+    if(!data.choices || !Array.isArray(data.choices) || data.choices.length === 0){
+      console.error('API Response Error:No choices found in response', data);
+      
+      // 尝试提取错误信息
+      const errorMsg = data.error?.message || 'API returned no content (choices is empty/undefined)';
+      throw new Error(errorMsg);
+    }
+
+    const choice = data.choices[0];
+
+    // 2.安全检查:检查message是否存在
+    if(!choice.message){
+      console.error('API Response Error: No message in choice',choice);
+      throw new Error('API returned a choice but no message content');
+    }
+    
+    const content = choice.message.content || '';
+    const reasoning = choice.message.reasoning_content || '';
+
+    // 3.安全检查：处理usage可能缺失的情况
+    const usage = data.usage || {};
+    const tokens = usage.completion_tokens || usage.completionTokens || 0;
+
+    // 4.速度计算
+    const speed = data.speed || '0.00';
+    
     updateCallback(
-      response.choices[0].message.content,
-      response.choices[0].message.reasoning_content || '',
-      response.usage.completion_tokens,
-      response.speed,
+      content,
+      reasoning,
+      tokens,
+      speed
     );
   },
 
@@ -64,8 +93,11 @@ export const messageHandler = {
       const lines = chunk.split('\n').filter((line) => line.trim() !== '');
 
       for (const line of lines) {
-        if (line === 'data:[DONE]') continue;
-        if (line.startsWith('data:')) {
+        const trimmedLine = line.trim();
+        if(!trimmedLine) continue;
+
+        if (trimmedLine === 'data: [DONE]' || trimmedLine === 'data:[DONE]') continue;
+        if (trimmedLine.startsWith('data:')) {
           // JSON的解析切片之后，从字符串中的第六个字符开始截取，一处SSE协议的data前缀
           const data = JSON.parse(line.slice(5));
           // 获取回复的文本，访问Choices[0].delta获取本次数据块的增量内容
