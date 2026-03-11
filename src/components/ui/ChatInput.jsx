@@ -8,8 +8,6 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { Input, Upload, message, Button, Dropdown, Space } from 'antd';
-const { TextArea } = Input;
-const { Dragger } = Upload;
 
 // ChatInput组件
 const ChatInput = ({ loading, onSend }) => {
@@ -26,6 +24,7 @@ const ChatInput = ({ loading, onSend }) => {
 
   // 处理发送信息
   const handleSend = () => {
+    console.log('handleSend调用了');
     const trimmedText = inputValue.trim();
     if((!trimmedText && fileList.length === 0 ) || loading) return;
 

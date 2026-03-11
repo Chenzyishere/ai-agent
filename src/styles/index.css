@@ -30,9 +30,6 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-
-
-/* global.css 或 styles.css */
 @keyframes gradient-flow {
   0%, 100% {
     background-position: 0% 40%;
