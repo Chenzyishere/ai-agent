@@ -181,7 +181,7 @@ export default function ChatPage() {
   return (
     <div className="flex h-screen w-screen flex-col">
       {/* 1. 独立背景层：应用模糊和渐变 */}
-      <div className="blur-7xl absolute inset-0 z-0 animate-[gradient-flow_8s_ease_infinite] bg-linear-to-r from-black via-pink-800 to-blue-800 bg-size-[200%_500%] filter"></div>
+      <div className="h-screen w-screen blur-7xl absolute inset-0 z-0 animate-[gradient-flow_8s_ease_infinite] bg-linear-to-r from-black via-pink-800 to-blue-800 bg-size-[200%_500%] filter"></div>
       <Header
         isSettingsOpen={isSettingsOpen}
         isHistoryOpen={isHistoryOpen}

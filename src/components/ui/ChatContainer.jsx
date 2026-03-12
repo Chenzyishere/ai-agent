@@ -14,7 +14,7 @@ export default function ChatContainer({ messages, onRegenerate, containerRef }) 
   }
 
   return (
-    <div ref={containerRef} className="pt-20 flex-1 overflow-y-auto px-4 py-6 custom-scrollbar-thin">
+    <div ref={containerRef} className="pt-20 pb-30 flex-1 overflow-y-auto px-4 py-6 custom-scrollbar-thin">
       {messages.map((msg, index) => {
         const isLastAssistant = 
           msg.role === 'assistant' && 
