@@ -126,7 +126,7 @@ const ChatInput = ({ loading, onSend }) => {
   ];
 
   return (
-    <div className="fixed bottom-2 left-1/2 -translate-x-1/2 w-5xl rounded-3xl border border-white/30 bg-white/30 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300">
+    <div className="fixed bottom-2 left-1/2 -translate-x-1/2 w-5xl max-w-full rounded-3xl border border-white/30 bg-white/30 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300">
       {/* 输入框 */}
       <textarea
         value={inputValue}
