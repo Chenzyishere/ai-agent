@@ -48,17 +48,6 @@ const MessageItem = ({
 
   // 2.引用
   const contentRef = useRef(null);
-
-  // 3，引入Zustand Store(用于全局操作)
-  const currentConversationId = useChatStore(
-    (state) => state.currentConversationId,
-  );
-  const addMessage = useChatStore((state) => state.addMessage);
-  const updateLastMessage = useChatStore((state) => state.updateLastMessage);
-  const setIsLoading = useChatStore((state) => state.setIsLoading);
-
-  // 如果需要从store删除某条消息，可以在store中增加deleteMessage动作，或者在这里处理
-
   // 4.计算属性(直接变量赋值)
 
   const renderedContent = renderMarkdown(safeMessage.content);
@@ -122,8 +111,10 @@ const MessageItem = ({
   };
 
   // 处理重新生成
-  const handleRegenerate = () => {
-    onRegenerate?.(message);
+  const handleRegenerateClick = () => {
+    if (onRegenerate) {
+      onRegenerate(safeMessage);
+    }
   };
 
   // 监听 DOM 变化以绑定代码块事件
@@ -219,44 +210,57 @@ const MessageItem = ({
         )}
 
         {/* --- 4. 消息主体气泡 (关键修改处) --- */}
-        <div
-          className={`relative w-fit overflow-hidden rounded-2xl p-4 text-base leading-relaxed wrap-break-word shadow-sm ${
-            isUser
-              ? 'rounded-br-none bg-blue-600 text-white' // 用户：蓝色，右下角切角可选
-              : 'rounded-bl-none border border-gray-100 bg-white text-gray-800' // AI：白色，左下角切角可选
-          }`}
-        >
-          {/* 渲染 Markdown 内容 */}
+        {renderedContent && !isAssistantLoading && (
           <div
-            ref={contentRef}
-            className={`markdown-body max-w-none ${
-              isUser ? 'prose-invert' : 'prose'
+            className={`relative w-fit overflow-hidden rounded-2xl p-4 text-base leading-relaxed wrap-break-word shadow-sm ${
+              isUser
+                ? 'rounded-br-none bg-blue-600 text-white' // 用户：蓝色，右下角切角可选
+                : 'rounded-bl-none border border-gray-100 bg-white text-gray-800' // AI：白色，左下角切角可选
             }`}
-            dangerouslySetInnerHTML={{ __html: renderedContent }}
-          />
-          {/* 操作按钮区域 */}
-          {!isUser && (
-            <div className="mt-2 flex items-center gap-2 pl-4">
-              <button>
-                <ReloadOutlined />
-                <span className="hidden">Regenerate</span>
-              </button>
-              <button>
-                <CopyOutlined />
-                <span className="hidden">Copy</span>
-              </button>
-              <button>
-                <LikeOutlined />
-                <span className="hidden">Like</span>
-              </button>
-              <button>
-                <DislikeOutlined />
-                <span className="hidden">Dislike</span>
-              </button>
-              <span>tokens:,Speed:</span>
-            </div>
-          )}
-        </div>
+          >
+            {/* 渲染 Markdown 内容 */}
+            <div
+              ref={contentRef}
+              className={`markdown-body max-w-none ${
+                isUser ? 'prose-invert' : 'prose'
+              }`}
+              dangerouslySetInnerHTML={{ __html: renderedContent }}
+            />
+            {/* 操作按钮区域 */}
+            {isLastAssistantMessage && !isUser && (
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  onClick={handleRegenerateClick}
+                  title="重新生成"
+                  className="cursor-pointer transition-all hover:translate-0.5"
+                >
+                  <ReloadOutlined />
+                </button>
+                <button
+                  onClick={handleCopy}
+                  title="复制"
+                  className="cursor-pointer transition-all hover:translate-0.5"
+                >
+                  <CopyOutlined />
+                </button>
+                <button
+                  onClick={handleLike}
+                  title="喜欢"
+                  className="cursor-pointer transition-all hover:translate-0.5"
+                >
+                  <LikeOutlined />
+                </button>
+                <button
+                  onClick={handleDislike}
+                  title="不喜欢"
+                  className="cursor-pointer transition-all hover:translate-0.5"
+                >
+                  <DislikeOutlined />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

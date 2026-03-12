@@ -37,31 +37,31 @@ export const useChatStore = create(
     switchConversation: (id) => set({ currentConversationId: id }),
 
     // [对话管理] 设置加载状态
-    setIsLoading:(loading) => set({isLoading:loading}),
+    setIsLoading: (loading) => set({ isLoading: loading }),
 
     // [消息管理] 添加消息
     addMessage: (message) => {
-      const {currentConversationId,conversations} = get();
-      if(!currentConversationId) return;
+      const { currentConversationId, conversations } = get();
+      if (!currentConversationId) return;
 
       set({
-        conversations:conversations.map((conversation)=>{
-          if(conversation.id === currentConversationId){
+        conversations: conversations.map((conversation) => {
+          if (conversation.id === currentConversationId) {
             return {
               ...conversation,
-              messages:[
+              messages: [
                 ...conversation.messages,
                 {
-                  id:Date.now(),
-                  timestamp:new Date().toISOString(),
+                  id: Date.now(),
+                  timestamp: new Date().toISOString(),
                   ...message,
-                }
-              ]
+                },
+              ],
             };
           }
           return conversation;
-        })
-      })
+        }),
+      });
     },
 
     // [消息管理] 更新最后一条消息（用于流式响应）
@@ -79,7 +79,8 @@ export const useChatStore = create(
         if (convIndex === -1) return state;
 
         const conversation = state.conversations[convIndex];
-        if (!conversation.messages || conversation.messages.length === 0) return state;
+        if (!conversation.messages || conversation.messages.length === 0)
+          return state;
         // 不可变更新数组中的最后一个元素
         const newMessages = [...conversation.messages];
         const lastMsgIndex = newMessages.length - 1;
@@ -93,12 +94,14 @@ export const useChatStore = create(
         };
 
         const newConversations = [...state.conversations];
-        newConversations[convIndex] = { ...conversation, messages: newMessages };
+        newConversations[convIndex] = {
+          ...conversation,
+          messages: newMessages,
+        };
 
         return { conversations: newConversations };
       });
     },
-
 
     // [消息管理] 获取最后一条消息(Helper)
     getLastMessage: () => {
@@ -109,6 +112,29 @@ export const useChatStore = create(
       return conversation?.messages?.length
         ? conversation.messages[conversation.messages.length - 1]
         : null;
+    },
+
+    removeLastMessages: () => {
+      set((state) => {
+        const convIndex = state.conversations.findIndex(
+          (c) => c.id === state.currentConversationId,
+        );
+        if (convIndex === -1) return state;
+
+        const messages = state.conversations[convIndex].messages;
+        if (messages.length < 2) return state;
+
+        // 切片保留除了最后两个之外的所有消息
+        const newMessages = messages.slice(0, -1);
+
+        const newConversations = [...state.conversations];
+        newConversations[convIndex] = {
+          ...newConversations[convIndex],
+          messages: newMessages,
+        };
+
+        return { conversations: newConversations };
+      });
     },
 
     // [对话维护] 更新标题
@@ -153,7 +179,7 @@ export const useChatStore = create(
     },
   })),
   {
-    name:'llm-chat-store',
-    storage:createJSONStorage(()=> localStorage)
-  }
+    name: 'llm-chat-store',
+    storage: createJSONStorage(() => localStorage),
+  },
 );

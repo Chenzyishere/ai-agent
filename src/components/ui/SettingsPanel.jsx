@@ -59,11 +59,8 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   return (
     <>      
       {/* 抽屉面板 */}
-      <div 
-        className={`fixed top-1/6 right-0 h-1/2 w-1/7 overflow-hidden rounded-2xl border border-white/30 bg-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transform transition-transform duration-300 ease-in-out flex flex-col ${
-          isOpen ? 'translate-x-0 right-2' : 'translate-x-full'
-        }`}
-      >
+  <div className={`fixed z-50 flex flex-col w-full h-full bg-white/30 shadow-2-xl backdrop-blur-xl shadow-2xl transition-all duration-300 md:top-1/6 md:right-2 md:h-1/2 md:w-fit md:rounded-2xl md:border md:border-white/30 md:bg-white/30 md:shadow-[0_8px_32px_rgba(0,0,0,0.1)] ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+        }`}>
         {/* 头部 */}
         <div className="flex items-center justify-between p-5">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -79,7 +76,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
         </div>
 
         {/* 内容区域 (可滚动) */}
-        <div className="flex-1 overflow-y-auto px-2 pt-10 space-y-6 h-full      [&::-webkit-scrollbar]:w-1
+        <div className="flex-1 overflow-y-auto px-2 pt-2 pb-5 space-y-6 h-full      [&::-webkit-scrollbar]:w-1
             [&::-webkit-scrollbar-track]:bg-none
             [&::-webkit-scrollbar-thumb]:bg-gray-700
             [&::-webkit-scrollbar-thumb]:rounded 

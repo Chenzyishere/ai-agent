@@ -1,51 +1,35 @@
-import React from 'react'
-import MessageItem from '@/components/ui/MessageItem'
-import { useChatStore } from '@/stores/useChatStore'
-export default function ChatContainer() {
-  // 1.从Zustand获取状态和方法
+import React from 'react';
+import MessageItem from './MessageItem'; // 假设你之前优化过的 MessageItem
 
-  // 获取当前会话的所有消息
-  // 使用选择器避免不必要的重渲染
-  const messages = useChatStore((state)=>{
-    const currentConv = state.conversations.find(
-      (c) => c.id === state.currentConversationId
+export default function ChatContainer({ messages, onRegenerate, containerRef }) {
+  if (!messages || messages.length === 0) {
+    return (
+      <div ref={containerRef} className="flex-1 overflow-y-auto flex items-center justify-center text-gray-400">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">开始新的对话</h2>
+          <p>发送消息以获取帮助</p>
+        </div>
+      </div>
     );
-    return currentConv ? currentConv.messages : [];
-  })
+  }
 
-// --- 3. 渲染列表 ---
   return (
-    <div className='h-full mt-28 mb-40 overflow-y-auto
-     [&::-webkit-scrollbar]:w-1
-            [&::-webkit-scrollbar-track]:bg-none
-            [&::-webkit-scrollbar-thumb]:bg-gray-700
-            [&::-webkit-scrollbar-thumb]:rounded 
-            [&::-webkit-scrollbar-thumb:hover]:bg-gray-400
-    '>
-      {/* 如果消息列表为空，显示欢迎语 */}
-      {messages.length === 0 ? (
-        <div className="flex h-full flex-col items-center justify-center text-gray-400">
-          <p>开始新的对话吧...</p>
-        </div>
-      ) : (
-        <div className="px-4">
-          {messages.map((msg, index) => {
-            // 判断是否为最后一条 AI 消息
-            // 条件：是当前索引 + 它是 assistant 角色 + 后面没有其他 assistant 消息了
-            const isLastAssistant = 
-              msg.role === 'assistant' && 
-              index === messages.length - 1;
+    <div ref={containerRef} className="pt-20 flex-1 overflow-y-auto px-4 py-6 custom-scrollbar-thin">
+      {messages.map((msg, index) => {
+        const isLastAssistant = 
+          msg.role === 'assistant' && 
+          index === messages.length - 1 && 
+          !msg.loading; // 只有非加载状态的最后一条 AI 消息才能重生成
 
-            return (
-              <MessageItem
-                key={msg.id || index} // 确保 key 唯一且稳定
-                message={msg}
-                isLastAssistantMessage={isLastAssistant}
-              />
-            );
-          })}
-        </div>
-      )}
+        return (
+          <MessageItem
+            key={msg.id || index}
+            message={msg}
+            isLastAssistantMessage={isLastAssistant}
+            onRegenerate={onRegenerate} // 直接透传 Page 提供的 handler
+          />
+        );
+      })}
     </div>
   );
 }

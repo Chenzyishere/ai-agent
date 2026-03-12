@@ -42,7 +42,7 @@ const ChatInput = ({ loading, onSend }) => {
   };
   const handleNewline = (e) => {
     e.preventDefault();
-    setInputValue((prev) => prev + '/n');
+    setInputValue((prev) => prev + '\n');
   };
   // 键盘事件
   const handleKeyDown = (e) => {
@@ -126,7 +126,7 @@ const ChatInput = ({ loading, onSend }) => {
   ];
 
   return (
-    <div className="fixed bottom-2 left-1/2 w-7xl max-w-4/5 -translate-x-1/2 rounded-3xl border border-white/30 bg-white/30 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300">
+    <div className="bottom-2 left-1/2 rounded-3xl border border-white/30 bg-white/30 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300">
       {/* 输入框 */}
       <textarea
         value={inputValue}
@@ -134,7 +134,7 @@ const ChatInput = ({ loading, onSend }) => {
         placeholder="输入消息,Enter发送,Shift+Enter换行,最大行数为6"
         onKeyDown={handleKeyDown}
         rows={1}
-        className="w-full bg-transparent border-none resize-none outline-none text-white placeholder-gray-100 min-h-6 max-h-37.5 overflow-y-auto custom-scrollbar"
+        className="w-full bg-transparent border-none resize-none outline-none text-white placeholder-gray-100 min-h-6 max-h-37.5 overflow-y-auto custom-scrollbar-thin"
         style={{
           minHeight: '1.5rem',
           maxHeight: '9rem',
