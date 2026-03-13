@@ -1,10 +1,10 @@
 import React from 'react';
-import Header from '@/components/ui/Header';
-import Banner from '@/components/ui/Banner';
-import AITimeline from '../components/ui/AITimeline';
-import AIFeatures from '../components/ui/AIFeatures';
-import Footer from '@/components/ui/Footer';
-import AIIntroSection from '@/components/ui/AIIntroSection';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import Banner from '@/sections/Banner';
+import AITimeline from '@/sections/AITimeline';
+import AIFeatures from '@/sections/AIFeatures';
+import AIIntroSection from '@/sections/AIIntroSection';
 export default function Homepage() {
   return (
     <div>

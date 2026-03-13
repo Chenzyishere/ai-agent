@@ -5,11 +5,11 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
+import Header from '@/components/layout/Header';
+import SettingsPanel from '@/components/layout/SettingsPanel';
 import ChatInput from '@/components/ui/ChatInput';
-import Header from '@/components/ui/Header';
 import ChatContainer from '@/components/ui/ChatContainer';
-import SettingsPanel from '@/components/ui/SettingsPanel';
-import HistoryChat from '@/components/ui/HistoryChat';
+import HistoryChat from '@/components/layout/HistoryChat';
 import { useChatStore } from '@/stores/useChatStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { messageHandler } from '@/utils/messageHandler';
