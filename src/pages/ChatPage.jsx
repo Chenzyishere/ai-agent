@@ -7,13 +7,13 @@ import React, {
 } from 'react';
 import Header from '@/components/layout/Header';
 import SettingsPanel from '@/components/layout/SettingsPanel';
-import ChatInput from '@/components/ui/ChatInput';
-import ChatContainer from '@/components/ui/ChatContainer';
+import ChatInput from '@/components/layout/ChatInput';
+import ChatContainer from '@/components/layout/ChatContainer';
 import HistoryChat from '@/components/layout/HistoryChat';
 import { useChatStore } from '@/stores/useChatStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { messageHandler } from '@/utils/messageHandler';
-import { createChatCompletion } from '@/utils/api';
+import { createChatCompletion } from '@/services/api';
 export default function ChatPage() {
   // 1.获取Store实例
   const chatStore = useChatStore();
