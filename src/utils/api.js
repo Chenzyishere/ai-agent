@@ -56,19 +56,17 @@ export const createChatCompletion = async (messages) =>{
         } else {
             // 非流式响应，等待完整响应并解析为JSON
             const data = await response.json();
-            // // 确认这里打印的是对象而不是函数
-            // console.log('API Non-Stream Response Data:',data);
             
-            // // 计算耗时(秒)
-            // const duration = (Date.now() -startTime)/1000;
+            // 计算耗时(秒)
+            const duration = (Date.now() -startTime)/1000;
             
             // //计算生成速度(tokens/秒)
             // // 防止除以0或数据缺失
-            // const completionTokens = data.usage?.completionTokens || 0;
-            // const speed = duration > 0 ? (completionTokens / duration).toFixed(2):'0.00';
+            const completionTokens = data.usage?.completionTokens || 0;
+            const speed = duration > 0 ? (completionTokens / duration).toFixed(2):'0.00';
 
-            // // 将速度信息附加到返回数据
-            // data.speed = speed;
+            // 将速度信息附加到返回数据
+            data.speed = speed;
             return data;
         }
 

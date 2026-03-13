@@ -2,30 +2,30 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-
 // api:sk-kbzcwxapqsoatnunquhjtsktakvxbkzplshufbicjyrulppj
 export const useSettingsStore = create(
-  persist((set) => ({
-    // State:设置对象
-    settings:{
-      model:'deepseek-ai/DeepSeek-R1',
-      apiKey:'',
-      stream:true,
-      maxTokens:4096,
-      temperature:0.7,
-      topP:0.7,
-      topK:50
-    },
+  persist(
+    (set) => ({
+      // State:设置对象
+      settings: {
+        model: 'deepseek-ai/DeepSeek-R1',
+        apiKey: '',
+        stream: true,
+        maxTokens: 4096,
+        temperature: 0.7,
+        topP: 0.7,
+        topK: 50,
+      },
 
-    // Actions:更新部分设置
-    updateSettings:(newSettings) =>
-      set((state) =>({
-        settings:{...state.settings,...newSettings}
-      })),
+      // Actions:更新部分设置
+      updateSettings: (newSettings) =>
+        set((state) => ({
+          settings: { ...state.settings, ...newSettings },
+        })),
 
-    // Actions:重置设置（可选）
-    resetSettings:()=>
-      set({
+      // Actions:重置设置（可选）
+      resetSettings: () =>
+        set({
           settings: {
             model: 'deepseek-ai/DeepSeek-R1',
             apiKey: '',
@@ -35,12 +35,14 @@ export const useSettingsStore = create(
             topP: 0.7,
             topK: 50,
           },
-      })
-   })
-),  {
-    name:'llm-chat-store',//这个是localStorage中的key
-    storage:createJSONStorage(()=> localStorage)
-  })
+        }),
+    }),
+    {
+      name: 'setting-storage', //这个是localStorage中的key
+      storage: createJSONStorage(() => localStorage),
+    },
+  ),
+);
 
 // 模型选择常量（保持不变）
 export const modelOptions = [

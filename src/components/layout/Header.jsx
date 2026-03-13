@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Settings, History, X,Menu } from 'lucide-react';
+import { Settings, History, X, Menu,Moon,Sun } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useThemeStore } from '@/stores/useThemeStore';
 import { Layout, Avatar, Dropdown, Space, message } from 'antd';
 import {
   UserOutlined,
@@ -16,6 +17,7 @@ const Header = ({
 }) => {
   const { user, logout } = useAuthStore();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { theme, toggleTheme } = useThemeStore();
   const [isLightBg, setIsLightBg] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -75,7 +77,9 @@ const Header = ({
 
     // 1. 检测背景颜色
     if (!isMobileMenuOpen) {
-      const sampleY = currentScrollY + 150;
+      const sampleY = currentScrollY + 10;
+      console.log(sampleY);
+      
       if (sampleY < document.documentElement.scrollHeight) {
         const element = document.elementFromPoint(
           window.innerWidth / 2,
@@ -178,14 +182,14 @@ const Header = ({
           <div className="relative flex w-full items-center justify-between px-4 py-1 sm:px-5">
             {/* Logo */}
             <h1
-              className={`cursor-pointer text-xl font-bold w-1/3 tracking-wider uppercase transition-colors duration-300 ${textColorClass}`}
+              className={`w-1/3 cursor-pointer text-xl font-bold tracking-wider uppercase transition-colors duration-300 ${textColorClass}`}
               onClick={closeMobileMenu}
             >
               <Link to="/">知微AI对话平台</Link>
             </h1>
 
             {/* --- 桌面端导航 (md 及以上显示) --- */}
-            <nav className="hidden items-center gap-8 md:flex md:justify-center lg:gap-10 w-1/3">
+            <nav className="hidden w-1/3 items-center gap-8 md:flex md:justify-center lg:gap-10">
               {navItems.map((item) => (
                 <Link
                   key={item.label}
@@ -201,7 +205,7 @@ const Header = ({
             </nav>
 
             {/* --- 右侧操作区 --- */}
-            <div className="flex items-center justify-end gap-2 w-1/3 sm:gap-3">
+            <div className="flex w-1/3 items-center justify-end gap-2 sm:gap-3">
               {/* 桌面端按钮组 (md 及以上显示) */}
               <div className="hidden items-center gap-2 md:flex">
                 {isAuthenticated && (
@@ -224,20 +228,25 @@ const Header = ({
                     </Space>
                   </Dropdown>
                 )}
-
-                {
-                  !isAuthenticated &&(
-                    <Link to="/login"
-                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
-                        isHistoryOpen
-                          ? 'bg-white/20 text-white shadow-inner'
-                          : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'}`
-                      }`}
-                    >
-                      登录
-                    </Link>
-                  )
-                }
+                {!isAuthenticated && (
+                  <Link
+                    to="/login"
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                      isHistoryOpen
+                        ? 'bg-white/20 text-white shadow-inner'
+                        : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'}`
+                    }`}
+                  >
+                    登录
+                  </Link>
+                )}
+                <button
+                  onClick={toggleTheme}
+                  className="rounded-full bg-gray-200 p-2 text-gray-800 transition-all hover:scale-110 dark:bg-white/10 dark:text-yellow-300"
+                  aria-label="Toggle Theme"
+                >
+                  {theme === 'light' ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
                 <button
                   onClick={toggleHistory}
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
