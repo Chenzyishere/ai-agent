@@ -1,5 +1,5 @@
 import React from 'react';
-import MessageItem from './MessageItem'; // 假设你之前优化过的 MessageItem
+import MessageItem from '@/components/ui/MessageItem';
 
 export default function ChatContainer({ messages, onRegenerate, containerRef }) {
   if (!messages || messages.length === 0) {

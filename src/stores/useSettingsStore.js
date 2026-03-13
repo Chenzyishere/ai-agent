@@ -2,7 +2,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-// api:sk-kbzcwxapqsoatnunquhjtsktakvxbkzplshufbicjyrulppj
 export const useSettingsStore = create(
   persist(
     (set) => ({
