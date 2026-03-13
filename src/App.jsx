@@ -1,27 +1,54 @@
-import React from 'react';
+import React, { useEffect,useState } from 'react';
 import { Route, Routes, Navigate, BrowserRouter } from 'react-router-dom';
 import { lazy } from 'react';
-import {
-  InboxOutlined,
-  UploadOutlined,
-  PaperClipOutlined,
-  SendOutlined,
-  ReloadOutlined,
-  CopyOutlined,
-  LikeOutlined,
-  DislikeOutlined,
-} from '@ant-design/icons';
-
-const Homepage = lazy(() => import('./pages/Homepage'));
-const ChatPage = lazy(() => import('./pages/ChatPage'));
+import { Spin } from 'antd'; 
+import { useAuthStore } from '@/stores/useAuthStore';
+import ProtectedRoute from '@/components/ui/ProtectRoute';
+import HomePage from '@/pages/Homepage';
+import ChatPage from '@/pages/ChatPage';
+import LoginPage from '@/pages/LoginPage';
+import DocPage from '@/pages/DocPage';
 export default function App() {
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const [loading,setLoading]=useState(true);
+
+  useEffect(() => {
+    // 应用启动时，检查本地是否有有效Token
+    const initAuth = async () => {
+      await checkAuth();
+      setLoading(false);
+    };
+    initAuth();
+  },[checkAuth]);
+
+  // 加载期间显示全屏Loading
+  // 加载期间显示全屏 Loading
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen w-screen bg-gray-50">
+        <Spin size="large" description="正在验证身份..." />
+        <p className="mt-4 text-gray-500 text-sm">请勿关闭页面</p>
+      </div>
+    );
+  }
   return (
     <BrowserRouter>
       <Routes>
-        <Route index element={<Homepage />} />
-        {/* 注意：这里的 path 不要加前面的斜杠 / */}
-        <Route path="HomePage" element={<Homepage />} />
-        <Route path="ChatPage" element={<ChatPage />} />
+        <Route index element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/doc" element={<DocPage />} />
+        {/* 受保护的路由 */}
+        <Route
+          path="chat"
+          element={
+            <ProtectedRoute>
+              <ChatPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* 4.404 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

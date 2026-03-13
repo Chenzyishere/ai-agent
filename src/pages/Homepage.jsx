@@ -1,30 +1,19 @@
 import React from 'react';
 import Header from '@/components/ui/Header';
-import Carousel from '../components/ui/Carousel';
-import Masonry from '../components/ui/Masonry';
-import { Image, Button } from 'antd';
+import Banner from '@/components/ui/Banner';
+import AITimeline from '../components/ui/AITimeline';
+import AIFeatures from '../components/ui/AIFeatures';
 import Footer from '@/components/ui/Footer';
-import GradientButton from '@/components/ui/GradientButton';
-import PirateIcon from '@/components/icons/PirateIcon';
-import { Link } from 'react-router-dom';
+import AIIntroSection from '@/components/ui/AIIntroSection';
 export default function Homepage() {
   return (
-    <>
+    <div>
       <Header />
-      <div className="relative h-lvh animate-[gradient-flow_8s_ease_infinite] overflow-hidden bg-linear-to-r from-purple-500 via-black to-black bg-size-[200%_200%]">
-        <h1 className="absolute top-2/5 left-1/10 z-10 w-1 -translate-y-1/2 text-7xl font-black text-white drop-shadow-lg">
-          Talk to the Agent
-        </h1>
-        <GradientButton
-          size="large"
-          className="absolute top-[83%] left-[10%] z-10 -translate-y-1/2"
-        >
-          <Link to="/ChatPage">Start right now</Link>
-        </GradientButton>
-      </div>
-      
-      <Masonry />
+      <Banner />
+      <AIIntroSection/>
+      <AITimeline />
+      <AIFeatures />
       <Footer />
-    </>
+    </div>
   );
 }
