@@ -4,9 +4,9 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
   
   return (
-    <footer className='relative mt-20'>
+    <footer className='relative mt-5'>
       {/* 液态玻璃容器 */}
-      <div className='max-w-7xl mx-auto px-4 py-12'>
+      <div className='max-w-7xl mx-auto px-4 pt-5 pb-12'>
         <div className='relative 
                         bg-black backdrop-blur-xl 
                         border border-white/20 
@@ -42,10 +42,10 @@ export default function Footer() {
                 <h3 className='text-white text-xl font-bold mb-4 
                                bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent
                                drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]'>
-                  My Website
+                  知微AI平台
                 </h3>
                 <p className='text-gray-300 text-sm leading-relaxed'>
-                  Building amazing experiences for users worldwide.
+                  打造给用户提供优秀体验的AI平台。
                 </p>
                 
                 {/* 社交媒体图标 */}
@@ -90,7 +90,7 @@ export default function Footer() {
               <div>
                 <h4 className='text-white font-semibold mb-4 
                                drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]'>
-                  Quick Links
+                  快速链接
                 </h4>
                 <ul className='space-y-2 text-sm'>
                   <li>

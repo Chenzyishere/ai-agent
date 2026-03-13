@@ -1,28 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Settings, History, Menu, X } from 'lucide-react';
-
+import { Settings, History, X,Menu } from 'lucide-react';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { Layout, Avatar, Dropdown, Space, message } from 'antd';
+import {
+  UserOutlined,
+  LogoutOutlined,
+  DashboardOutlined,
+} from '@ant-design/icons';
 const Header = ({
   isSettingsOpen,
   isHistoryOpen,
   toggleSettings,
   toggleHistory,
 }) => {
+  const { user, logout } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [isLightBg, setIsLightBg] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   const lastScrollYRef = useRef(0);
   const navigate = useNavigate();
 
-  // 导航数据配置
-  const navItems = [
-    { label: 'Profile', to: '#' },
-    { label: 'Blog', to: '#' },
-    { label: 'Learn More', to: '#' },
-  ];
-
   // ==================== 工具函数 ====================
+
+  const handleLogout = () => {
+    if (window.confirm('确定退出登录?')) {
+      logout();
+      message.success('已安全退出');
+      navigate('/login');
+    }
+  };
 
   const getActualBgColor = (element) => {
     let current = element;
@@ -68,7 +77,10 @@ const Header = ({
     if (!isMobileMenuOpen) {
       const sampleY = currentScrollY + 150;
       if (sampleY < document.documentElement.scrollHeight) {
-        const element = document.elementFromPoint(window.innerWidth / 2, sampleY);
+        const element = document.elementFromPoint(
+          window.innerWidth / 2,
+          sampleY,
+        );
         if (element) {
           const { rgb } = getActualBgColor(element);
           const brightness = getBrightness(rgb);
@@ -112,6 +124,22 @@ const Header = ({
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
+  // 导航数据配置
+  const navItems = [
+    { label: 'Blog', to: 'https://blog.chenzymark.space' },
+    { label: 'Doc', to: '/doc' },
+  ];
+
+  const dropdownItems = [
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: '退出登录',
+      danger: true, // 红色文字，表示危险操作
+      onClick: handleLogout,
+    },
+  ];
+
   // ==================== 动态样式 ====================
 
   // 注意：深色模式下稍微加深背景，保证文字可读性
@@ -147,18 +175,17 @@ const Header = ({
           ></div>
 
           {/* 内容层 */}
-          <div className="relative flex w-full items-center justify-between px-4 sm:px-5 py-1">
-            
+          <div className="relative flex w-full items-center justify-between px-4 py-1 sm:px-5">
             {/* Logo */}
             <h1
-              className={`cursor-pointer text-xl font-bold tracking-wider uppercase transition-colors duration-300 ${textColorClass}`}
+              className={`cursor-pointer text-xl font-bold w-1/3 tracking-wider uppercase transition-colors duration-300 ${textColorClass}`}
               onClick={closeMobileMenu}
             >
-              <Link to="/HomePage">AI-AGENT PRO</Link>
+              <Link to="/">知微AI对话平台</Link>
             </h1>
 
             {/* --- 桌面端导航 (md 及以上显示) --- */}
-            <nav className="hidden md:flex items-center gap-8 lg:gap-10">
+            <nav className="hidden items-center gap-8 md:flex md:justify-center lg:gap-10 w-1/3">
               {navItems.map((item) => (
                 <Link
                   key={item.label}
@@ -174,21 +201,43 @@ const Header = ({
             </nav>
 
             {/* --- 右侧操作区 --- */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              
+            <div className="flex items-center justify-end gap-2 w-1/3 sm:gap-3">
               {/* 桌面端按钮组 (md 及以上显示) */}
-              <div className="hidden md:flex items-center gap-2">
-                <button
-                  onClick={toggleHistory}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
-                    isHistoryOpen
-                      ? 'bg-white/20 text-white shadow-inner'
-                      : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'}`
-                  }`}
-                >
-                  登录
-                </button>
-                
+              <div className="hidden items-center gap-2 md:flex">
+                {isAuthenticated && (
+                  <Dropdown
+                    menu={{ items: dropdownItems }}
+                    placement="bottomRight"
+                    arrow
+                  >
+                    <Space className="cursor-pointer rounded-lg p-2 transition-colors hover:bg-gray-50">
+                      {/* 用户头像 */}
+                      <Avatar
+                        src={user?.avatar}
+                        icon={!user?.avatar && <UserOutlined />}
+                        className="bg-blue-500"
+                      />
+                      {/* 用户名 */}
+                      <span className="hidden font-medium text-gray-700 sm:inline-block">
+                        {user?.displayName || user?.username || '访客'}
+                      </span>
+                    </Space>
+                  </Dropdown>
+                )}
+
+                {
+                  !isAuthenticated &&(
+                    <Link to="/login"
+                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                        isHistoryOpen
+                          ? 'bg-white/20 text-white shadow-inner'
+                          : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'}`
+                      }`}
+                    >
+                      登录
+                    </Link>
+                  )
+                }
                 <button
                   onClick={toggleHistory}
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
@@ -198,7 +247,9 @@ const Header = ({
                   }`}
                   aria-label="History"
                 >
-                  <History className={`h-5 w-5 ${isHistoryOpen ? 'animate-spin-slow' : ''}`} />
+                  <History
+                    className={`h-5 w-5 ${isHistoryOpen ? 'animate-spin-slow' : ''}`}
+                  />
                   <span className="hidden lg:inline">历史记录</span>
                 </button>
 
@@ -211,14 +262,16 @@ const Header = ({
                   }`}
                   aria-label="Settings"
                 >
-                  <Settings className={`h-5 w-5 ${isSettingsOpen ? 'animate-spin-slow' : ''}`} />
+                  <Settings
+                    className={`h-5 w-5 ${isSettingsOpen ? 'animate-spin-slow' : ''}`}
+                  />
                   <span className="hidden lg:inline">设置</span>
                 </button>
               </div>
 
               {/* 移动端菜单按钮 (仅 md 以下显示) */}
               <button
-                className="md:hidden p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="rounded-lg p-2 transition-colors duration-200 focus:ring-2 focus:ring-white/30 focus:outline-none md:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label="Toggle menu"
               >
@@ -238,26 +291,23 @@ const Header = ({
              2. overflow-hidden 确保内容不溢出。
              3. z-[9999] 确保层级最高。
           */}
-          <div 
-            className={`
-              md:hidden absolute top-full left-0 right-0 mx-2 sm:mx-4 mt-2 rounded-2xl overflow-hidden shadow-2xl border backdrop-blur-xl z-50
-              transition-all duration-300 ease-in-out origin-top
-              ${isMobileMenuOpen 
-                ? 'opacity-100 scale-100 max-h-96 visible' 
-                : 'opacity-0 scale-95 max-h-0 invisible'}
-              bg-amber-50 border-none
-            `}
+          <div
+            className={`absolute top-full right-0 left-0 z-50 mx-2 mt-2 origin-top overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl transition-all duration-300 ease-in-out sm:mx-4 md:hidden ${
+              isMobileMenuOpen
+                ? 'visible max-h-96 scale-100 opacity-100'
+                : 'invisible max-h-0 scale-95 opacity-0'
+            } border-none bg-amber-50`}
           >
-            <div className="flex flex-col p-4 space-y-1">
+            <div className="flex flex-col space-y-1 p-4">
               {/* 导航链接 */}
               {navItems.map((item) => (
                 <Link
                   key={item.label}
                   to={item.to}
                   onClick={closeMobileMenu}
-                  className={`block px-4 py-3 rounded-xl text-base font-medium transition-colors duration-200 ${
-                    isLightBg 
-                      ? 'text-gray-800 hover:bg-gray-900/5' 
+                  className={`block rounded-xl px-4 py-3 text-base font-medium transition-colors duration-200 ${
+                    isLightBg
+                      ? 'text-gray-800 hover:bg-gray-900/5'
                       : 'text-white hover:bg-white/10'
                   }`}
                 >
@@ -265,12 +315,17 @@ const Header = ({
                 </Link>
               ))}
 
-              <div className={`h-px my-2 ${isLightBg ? 'bg-gray-900/10' : 'bg-white/10'}`}></div>
+              <div
+                className={`my-2 h-px ${isLightBg ? 'bg-gray-900/10' : 'bg-white/10'}`}
+              ></div>
 
               {/* 功能按钮 */}
               <button
-                onClick={() => { toggleHistory(); closeMobileMenu(); }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
+                onClick={() => {
+                  toggleHistory();
+                  closeMobileMenu();
+                }}
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-200 ${
                   isHistoryOpen
                     ? 'bg-white/20 text-white shadow-inner'
                     : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/5' : 'text-white/80 hover:bg-white/10'}`
@@ -281,8 +336,11 @@ const Header = ({
               </button>
 
               <button
-                onClick={() => { toggleSettings(); closeMobileMenu(); }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
+                onClick={() => {
+                  toggleSettings();
+                  closeMobileMenu();
+                }}
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-200 ${
                   isSettingsOpen
                     ? 'bg-white/20 text-white shadow-inner'
                     : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/5' : 'text-white/80 hover:bg-white/10'}`
@@ -293,8 +351,10 @@ const Header = ({
               </button>
 
               <button
-                onClick={() => { closeMobileMenu(); }}
-                className={`mt-2 w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 ${
+                onClick={() => {
+                  closeMobileMenu();
+                }}
+                className={`mt-2 w-full rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
                   isLightBg
                     ? 'bg-gray-900 text-white hover:bg-gray-800'
                     : 'bg-white text-gray-900 hover:bg-gray-100'
