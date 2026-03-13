@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { renderMarkdown } from '@/utils/markdown.js';
 import {
-  InboxOutlined,
-  UploadOutlined,
-  PaperClipOutlined,
-  SendOutlined,
   ReloadOutlined,
   CopyOutlined,
   LikeOutlined,
@@ -45,7 +41,7 @@ const MessageItem = ({
   const [isDisliked, setIsDisliked] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isReasoningExpanded, setIsReasoningExpanded] = useState(true);
-
+  const {isLoading,setIsLoading} = useChatStore();
   // 2.引用
   const contentRef = useRef(null);
   // 4.计算属性(直接变量赋值)
@@ -54,8 +50,9 @@ const MessageItem = ({
   const renderedReasoning = message.reasoning_content
     ? renderMarkdown(safeMessage.reasoning_content)
     : '';
-  const isUser = message.role === 'user';
-  const isAssistantLoading = message.loading && message.role === 'assistant';
+  const isUser = safeMessage.role === 'user';
+  const isAssistant = safeMessage.role === 'assistant';
+  const isAssistantLoading = isAssistant && isLoading ? true :false;
 
   // 5.事件处理
   // 切换深度思考展开/折叠
@@ -88,7 +85,7 @@ const MessageItem = ({
   // 处理整体消息复制
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(message.content);
+      await navigator.clipboard.writeText(safeMessage.content);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
@@ -184,12 +181,11 @@ const MessageItem = ({
         )}
 
         {/* 深度思考开关 */}
-        {!isUser && !isAssistantLoading && safeMessage.reasoning_content && (
+        {isAssistant && safeMessage.reasoning_content && (
           <div
             onClick={toggleReasoning}
             className="mb-2 ml-4 flex w-fit cursor-pointer items-center gap-1 rounded bg-blue-50 px-2 py-1 transition-colors hover:bg-blue-100"
           >
-            {/* <img src={thinkingIcon} alt="thinking" className="h-3.5 w-3.5" /> */}
             <span className="text-sm text-blue-600">深度思考</span>
             <span
               className={`text-xs text-blue-600 transition-transform duration-200 ${isReasoningExpanded ? 'rotate-180' : ''}`}
@@ -200,7 +196,7 @@ const MessageItem = ({
         )}
 
         {/* 深度思考内容 */}
-        {!isUser && isReasoningExpanded && !isAssistantLoading && (
+        {isAssistant && isReasoningExpanded && (
           <div className="markdown-body mb-2 border-l-4 border-gray-100 px-4 py-0 text-sm leading-relaxed text-gray-100">
             <div
               className="markdown-body prose prose-sm prose-indigo max-w-none"
@@ -209,8 +205,8 @@ const MessageItem = ({
           </div>
         )}
 
-        {/* --- 4. 消息主体气泡 (关键修改处) --- */}
-        {renderedContent && !isAssistantLoading && (
+        {/* --- 4. 消息主体气泡--- */}
+        {renderedContent && (
           <div
             className={`relative w-fit overflow-hidden rounded-2xl p-4 text-base leading-relaxed wrap-break-word shadow-sm ${
               isUser
@@ -227,7 +223,7 @@ const MessageItem = ({
               dangerouslySetInnerHTML={{ __html: renderedContent }}
             />
             {/* 操作按钮区域 */}
-            {isLastAssistantMessage && !isUser && (
+            {isAssistant && isLastAssistantMessage && (
               <div className="mt-2 flex items-center gap-2">
                 <button
                   onClick={handleRegenerateClick}
@@ -257,6 +253,8 @@ const MessageItem = ({
                 >
                   <DislikeOutlined />
                 </button>
+                <span>tokens:{safeMessage.completion_tokens}</span>
+                <span>speed:{safeMessage.speed}ms</span>
               </div>
             )}
           </div>

@@ -2,6 +2,25 @@
 <html lang="en">
   <head>
     <script type="text/javascript">
+      // 这个时处理主题切换，防止Flash of Unstyled Content的脚本
+      (function () {
+        try {
+          const theme = localStorage.getItem('theme-storage');
+          if (theme) {
+            const parsed = JSON.parse(theme);
+            if (parsed.state && parsed.state.theme === 'dark') {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
+          } else if (
+            window.matchMedia('(prefers-color-scheme: dark)').matches
+          ) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+      // 这个是处理在没有域名的时候，github page的跳转配置
       (function (l) {
         if (l.search[1] === '/') {
           var decoded = l.search

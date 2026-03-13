@@ -1,6 +1,5 @@
 import React, { useEffect,useState } from 'react';
 import { Route, Routes, Navigate, BrowserRouter } from 'react-router-dom';
-import { lazy } from 'react';
 import { Spin } from 'antd'; 
 import { useAuthStore } from '@/stores/useAuthStore';
 import ProtectedRoute from '@/components/ui/ProtectRoute';

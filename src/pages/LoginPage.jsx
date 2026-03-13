@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
-import Header from '@/components/ui/Header';
+import Header from '@/components/layout/Header';
 import {
   Form,
   Input,

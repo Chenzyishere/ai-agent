@@ -1,5 +1,5 @@
+@variant dark (&:where(.dark, .dark *));
 @import "tailwindcss";
-@plugin "tailwindcss-animate";
 
 :root {
   font-family: 'Segoe UI', 'PingFang SC', 'Noto Sans SC', sans-serif;
