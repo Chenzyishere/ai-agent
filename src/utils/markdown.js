@@ -15,7 +15,7 @@ const md = new MarkdownIt({
     if (lang && hljs.getLanguage(lang)) {
       try {
         const highlighted = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value
-        return `<div class="code-block"><div class="code-header"><span class="code-lang">${lang}</span><div class="code-actions"><button class="code-action-btn" data-action="copy" data-tooltip="复制"><img src="${copyIcon}" alt="copy" /></button><button class="code-action-btn" data-action="theme" data-tooltip="切换主题"><img src="${darkIcon}" alt="theme" data-light-icon="${lightIcon}" data-dark-icon="${darkIcon}" /></button></div></div><pre class="hljs"><code>${highlighted}</code></pre></div>`
+        return `<div class="code-block"><div class="code-header"><span class="code-lang">${lang}</span><div class="code-actions"><button type="button" class="code-action-btn" data-action="copy" data-tooltip="复制" aria-label="复制代码"><img src="${copyIcon}" alt="" /></button><button type="button" class="code-action-btn" data-action="theme" data-tooltip="切换主题" aria-label="切换代码块主题"><img src="${darkIcon}" alt="" data-light-icon="${lightIcon}" data-dark-icon="${darkIcon}" /></button></div></div><pre class="hljs"><code>${highlighted}</code></pre></div>`
         // eslint-disable-next-line no-unused-vars, no-empty
       } catch (__) { }
     }

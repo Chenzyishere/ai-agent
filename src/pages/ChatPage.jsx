@@ -42,6 +42,10 @@ export default function ChatPage() {
   // Refs
   const messageContainerRef = useRef(null);
 
+  useEffect(() => {
+    document.title = '聊天 - 知微AI对话平台';
+  }, []);
+
   // 4.自动滚动逻辑
   useEffect(() => {
     // 当消息列表变化或加载状态变化时，滚动到底部
@@ -160,7 +164,10 @@ export default function ChatPage() {
   return (
     <>
       {/* 1. 独立背景层：应用模糊和渐变 */}
-      <div className="blur-7xl absolute inset-0 z-0 h-screen w-screen animate-[gradient-flow_8s_ease_infinite] bg-linear-to-r from-black via-pink-800 to-blue-800 bg-size-[200%_500%] filter"></div>
+      <div
+        aria-hidden="true"
+        className="blur-7xl absolute inset-0 z-0 h-screen w-screen animate-[gradient-flow_8s_ease_infinite] bg-linear-to-r from-black via-pink-800 to-blue-800 bg-size-[200%_500%] filter"
+      ></div>
       <div className="flex h-screen w-screen flex-col">
         <Header
           isSettingsOpen={isSettingsOpen}
@@ -168,7 +175,7 @@ export default function ChatPage() {
           toggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
           toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
         />
-        <div className="relative mx-auto flex w-screen justify-center">
+        <main id="main-content" className="relative mx-auto flex w-screen justify-center">
           {/* 历史记录面板 */}
           <HistoryChat
             isOpen={isHistoryOpen}
@@ -192,7 +199,7 @@ export default function ChatPage() {
             />
             <ChatInput loading={isProcessing} onSend={handleNewMessage} />
           </div>
-        </div>
+        </main>
       </div>
     </>
   );

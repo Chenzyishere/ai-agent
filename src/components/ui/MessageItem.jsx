@@ -182,8 +182,10 @@ const MessageItem = ({
 
         {/* 深度思考开关 */}
         {isAssistant && safeMessage.reasoning_content && (
-          <div
+          <button
+            type="button"
             onClick={toggleReasoning}
+            aria-expanded={isReasoningExpanded}
             className="mb-2 ml-4 flex w-fit cursor-pointer items-center gap-1 rounded bg-blue-50 px-2 py-1 transition-colors hover:bg-blue-100"
           >
             <span className="text-sm text-blue-600">深度思考</span>
@@ -192,7 +194,7 @@ const MessageItem = ({
             >
               ▼
             </span>
-          </div>
+          </button>
         )}
 
         {/* 深度思考内容 */}
@@ -226,28 +228,36 @@ const MessageItem = ({
             {isAssistant && isLastAssistantMessage && (
               <div className="mt-2 flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={handleRegenerateClick}
+                  aria-label="重新生成"
                   title="重新生成"
                   className="cursor-pointer transition-all hover:translate-0.5"
                 >
                   <ReloadOutlined />
                 </button>
                 <button
+                  type="button"
                   onClick={handleCopy}
+                  aria-label="复制"
                   title="复制"
                   className="cursor-pointer transition-all hover:translate-0.5"
                 >
                   <CopyOutlined />
                 </button>
                 <button
+                  type="button"
                   onClick={handleLike}
+                  aria-label="喜欢"
                   title="喜欢"
                   className="cursor-pointer transition-all hover:translate-0.5"
                 >
                   <LikeOutlined />
                 </button>
                 <button
+                  type="button"
                   onClick={handleDislike}
+                  aria-label="不喜欢"
                   title="不喜欢"
                   className="cursor-pointer transition-all hover:translate-0.5"
                 >

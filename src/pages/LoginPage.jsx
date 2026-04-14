@@ -24,6 +24,13 @@ export default function LoginPage() {
 
   const [activeTab, setActiveTab] = useState('login');
 
+  useEffect(() => {
+    document.title =
+      activeTab === 'register'
+        ? '注册 - 知微AI对话平台'
+        : '登录 - 知微AI对话平台';
+  }, [activeTab]);
+
   // 如果已经登录，自动跳转回首页或之前尝试访问的页面
   useEffect(() => {
     if (isAuthenticated) {
@@ -56,14 +63,15 @@ export default function LoginPage() {
 
   return (
     <div className="relative w-full min-h-screen md:h-lvh overflow-hidden bg-black">
-      <div className="absolute inset-0 animate-[gradient-flow_8s_ease_infinite] bg-linear-to-r from-purple-900 via-slate-900 to-black bg-[length:200%_200%] z-0">
+      <div aria-hidden="true" className="absolute inset-0 animate-[gradient-flow_8s_ease_infinite] bg-linear-to-r from-purple-900 via-slate-900 to-black bg-[length:200%_200%] z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-purple-600/20 rounded-full blur-[100px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-600/10 rounded-full blur-[100px]" />
-        <div/>
+
         {/* 内容容器：相对定位，确保在背景之上 */}
+      </div>
       <div className="relative z-10 flex flex-col min-h-screen md:h-lvh">
         <Header />
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <main id="main-content" className="flex-1 flex items-center justify-center p-4 sm:p-6">
 <div className="w-full max-w-[480px] rounded-2xl border border-white/20 bg-white/10 p-6 sm:p-8 md:p-10 shadow-2xl backdrop-blur-xl">
           <div className="mb-8 text-center">
             <Title level={2} className="mb-2!">
@@ -103,6 +111,7 @@ export default function LoginPage() {
                     requiredMark={false}
                   >
                     <Form.Item
+                      label="用户名"
                       name="username"
                       rules={[{ required: true, message: '请输入用户名' }]}
                     >
@@ -112,6 +121,7 @@ export default function LoginPage() {
                       />
                     </Form.Item>
                     <Form.Item
+                      label="密码"
                       name="password"
                       rules={[{ required: true, message: '请输入密码' }]}
                     >
@@ -148,6 +158,7 @@ export default function LoginPage() {
                     requiredMark={false}
                   >
                     <Form.Item
+                      label="用户名"
                       name="username"
                       rules={[
                         { required: true, message: '请输入用户名' },
@@ -160,6 +171,7 @@ export default function LoginPage() {
                       />
                     </Form.Item>
                     <Form.Item
+                      label="邮箱"
                       name="email"
                       rules={[
                         { required: true, message: '请输入邮箱' },
@@ -169,6 +181,7 @@ export default function LoginPage() {
                       <Input prefix={<MailOutlined />} placeholder="邮箱地址" />
                     </Form.Item>
                     <Form.Item
+                      label="密码"
                       name="password"
                       rules={[
                         { required: true, message: '请输入密码' },
@@ -208,8 +221,7 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-      </div>
-      </div>
+      </main>
       </div>
     </div>
   );
