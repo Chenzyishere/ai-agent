@@ -41,7 +41,7 @@ const MessageItem = ({
   const [isDisliked, setIsDisliked] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isReasoningExpanded, setIsReasoningExpanded] = useState(true);
-  const {isLoading,setIsLoading} = useChatStore();
+  const isLoading = useChatStore((s) => s.isLoading);
   // 2.引用
   const contentRef = useRef(null);
   // 4.计算属性(直接变量赋值)
@@ -106,6 +106,18 @@ const MessageItem = ({
     if (isLiked) setIsLiked(false);
     // 这里可以调用 API 记录反馈
   };
+
+  // 切换代码块主题
+  const handleThemeToggle = useCallback((event) => {
+    const btn = event.currentTarget;
+    const codeBlock = btn.closest('.code-block');
+    if (!codeBlock) return;
+    codeBlock.classList.toggle('theme-light');
+    const lightIcon = btn.getAttribute('data-light-icon');
+    const darkIcon = btn.getAttribute('data-dark-icon');
+    const isLight = codeBlock.classList.contains('theme-light');
+    btn.innerHTML = isLight ? lightIcon : darkIcon;
+  }, []);
 
   // 处理重新生成
   const handleRegenerateClick = () => {
@@ -274,4 +286,4 @@ const MessageItem = ({
   );
 };
 
-export default MessageItem;
+export default React.memo(MessageItem);

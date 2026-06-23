@@ -71,7 +71,7 @@ export const createChatCompletion = async (messages) =>{
         }
 
     }catch(error) {
-        console.log('Chat API Error:',error);
+        console.error('Chat API Error:',error);
         throw error;
     }
 }

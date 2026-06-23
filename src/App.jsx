@@ -1,12 +1,21 @@
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Route, Routes, Navigate, BrowserRouter } from 'react-router-dom';
-import { Spin } from 'antd'; 
+import { Spin } from 'antd';
 import { useAuthStore } from '@/stores/useAuthStore';
 import ProtectedRoute from '@/components/ui/ProtectRoute';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import HomePage from '@/pages/Homepage';
-import ChatPage from '@/pages/ChatPage';
-import LoginPage from '@/pages/LoginPage';
-import DocPage from '@/pages/DocPage';
+
+const ChatPage = lazy(() => import('@/pages/ChatPage'));
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const DocPage = lazy(() => import('@/pages/DocPage'));
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-screen w-screen bg-gray-50">
+    <Spin size="large" description="加载中..." />
+  </div>
+);
+
 export default function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -39,22 +48,26 @@ export default function App() {
       >
         跳到主要内容
       </a>
-      <Routes>
-        <Route index element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/doc" element={<DocPage />} />
-        {/* 受保护的路由 */}
-        <Route
-          path="chat"
-          element={
-            <ProtectedRoute>
-              <ChatPage />
-            </ProtectedRoute>
-          }
-        />
-        {/* 4.404 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route index element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/doc" element={<DocPage />} />
+            {/* 受保护的路由 */}
+            <Route
+              path="chat"
+              element={
+                <ProtectedRoute>
+                  <ChatPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 4.404 */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

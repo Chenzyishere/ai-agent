@@ -8,9 +8,7 @@ const contentStyle = {
   background: '#364d79',
 };
 export default function App(){
-  const onChange = currentSlide => {
-    console.log(currentSlide);
-  };
+  const onChange = () => {};
   return (
     <Carousel afterChange={onChange}>
       <div className='relative' style={contentStyle}>
