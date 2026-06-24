@@ -96,10 +96,17 @@ export default function ChatPage() {
               (c) => c.id === useChatStore.getState().currentConversationId,
             )?.messages || [];
 
-        const messagesPayload = freshMessages
-          .filter((m) => m.role === 'user' || m.role === 'assistant')
-          .slice(0, -1)
-          .map(({ role, content }) => ({ role, content }));
+        const systemMsg = {
+          role: 'system',
+          content: `你是知微AI平台的智能助手。当前使用的模型是 ${settingsStore.settings?.model || 'AI大模型'}。请用中文回答，自称知微AI。`,
+        };
+        const messagesPayload = [
+          systemMsg,
+          ...freshMessages
+            .filter((m) => m.role === 'user' || m.role === 'assistant')
+            .slice(0, -1)
+            .map(({ role, content }) => ({ role, content })),
+        ];
 
         const isStreamMode = settingsStore.settings?.stream ?? false;
 
@@ -133,11 +140,26 @@ export default function ChatPage() {
     executeChatFlow(content.text, content.files, false);
   };
 
-  const handleRegenerate = async () => {
-    if (currentMessages.length < 2) return;
-    const lastUserMsg = currentMessages[currentMessages.length - 2];
-    removeLastMessages();
-    await executeChatFlow(lastUserMsg.content, lastUserMsg.files || [], true);
+  const handleRegenerate = (assistantMsg) => {
+    if (!assistantMsg || currentMessages.length < 2) return;
+    const state = useChatStore.getState();
+    const conv = state.conversations.find((c) => c.id === currentId);
+    if (!conv) return;
+    const msgs = conv.messages;
+    const aiIndex = msgs.findIndex((m) => m.id === assistantMsg.id);
+    if (aiIndex < 1) return;
+    const userMsg = msgs[aiIndex - 1];
+    if (userMsg.role !== 'user') return;
+    // 删除该 AI 消息及之后的所有消息
+    const keepMsgs = msgs.slice(0, aiIndex);
+    useChatStore.setState((prev) => {
+      const idx = prev.conversations.findIndex((c) => c.id === currentId);
+      if (idx === -1) return prev;
+      const newConvs = [...prev.conversations];
+      newConvs[idx] = { ...newConvs[idx], messages: keepMsgs };
+      return { conversations: newConvs };
+    });
+    executeChatFlow(userMsg.content, userMsg.files || [], true);
   };
 
   return (

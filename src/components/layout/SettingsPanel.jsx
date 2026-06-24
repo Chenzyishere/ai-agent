@@ -1,335 +1,293 @@
-import React, { useState, useEffect, useMemo,useRef } from 'react';
-import { useSettingsStore, modelOptions } from '@/stores/useSettingsStore';
-import { 
-  X, 
-  Settings, 
-  HelpCircle, 
-  ExternalLink, 
-  Eye, 
-  EyeOff, 
-  ChevronDown 
-} from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSettingsStore, providers, providerKeys, providerKeyLinks } from '@/stores/useSettingsStore';
+import { X, Settings, HelpCircle, ExternalLink, Eye, EyeOff, ChevronDown } from 'lucide-react';
 
-/**
- * 通用 Tooltip 组件 (简单实现)
- */
 const Tooltip = ({ content, children }) => {
   const [visible, setVisible] = useState(false);
   return (
-    <div 
-      className="relative inline-block"
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-    >
+    <div className="relative inline-block" onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
       {children}
       {visible && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow-lg whitespace-nowrap z-50">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-zinc-700 rounded-lg shadow-lg whitespace-nowrap z-50">
           {content}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-700" />
         </div>
       )}
     </div>
   );
 };
 
-/**
- * 设置面板组件
- * @param {boolean} isOpen - 控制显示
- * @param {function} onClose - 关闭回调
- */
-const SettingsPanel = ({ isOpen, onClose }) => {
+function RangeSlider({ value, min, max, step, onChange }) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div className="relative flex-1 h-5 flex items-center">
+      {/* 轨道未填充部分 */}
+      <div className="absolute left-0 right-0 h-1.5 rounded-full bg-white/15" />
+      {/* 轨道已填充部分 */}
+      <div
+        className="absolute left-0 h-1.5 rounded-full bg-purple-400"
+        style={{ width: `${pct}%` }}
+      />
+      {/* 原生 range（透明覆盖，只暴露滑块） */}
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={onChange}
+        className="relative w-full h-5 appearance-none bg-transparent cursor-pointer
+          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+          [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md
+          [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-0
+          [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full
+          [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+      />
+    </div>
+  );
+}
+
+export default function SettingsPanel({ isOpen, onClose }) {
   const { settings, updateSettings } = useSettingsStore();
   const [showApiKey, setShowApiKey] = useState(false);
 
-  // 计算当前选中模型的最大 tokens
+  const currentProvider = providers[settings.provider] || providers.siliconflow;
+  const currentModels = currentProvider?.models || providers.siliconflow.models;
+  const currentModelExists = currentModels.some((m) => m.value === settings.model);
+  const activeModel = currentModelExists ? settings.model : currentModels[0].value;
+
   const currentMaxTokens = useMemo(() => {
-    const selectedModel = modelOptions.find((opt) => opt.value === settings.model);
-    return selectedModel ? selectedModel.maxTokens : 4096;
-  }, [settings.model]);
+    const m = currentModels.find((m) => m.value === activeModel);
+    return m ? m.maxTokens : 4096;
+  }, [activeModel, currentModels]);
 
-  // 监听模型变化，自动调整 maxTokens
   useEffect(() => {
-    const selectedModel = modelOptions.find((opt) => opt.value === settings.model);
-    if (selectedModel && settings.maxTokens > selectedModel.maxTokens) {
-      updateSettings({ maxTokens: selectedModel.maxTokens });
+    if (!currentModelExists) {
+      updateSettings({ model: activeModel });
     }
-  }, [settings.model, settings.maxTokens, updateSettings]);
+  }, [currentModelExists, activeModel, updateSettings]);
 
+  const handleProviderChange = (key) => {
+    const defaultModel = providers[key].models[0].value;
+    updateSettings({ provider: key, model: defaultModel, maxTokens: providers[key].models[0].maxTokens });
+  };
 
   return (
-    <>      
-      {/* 抽屉面板 */}
-  <div className={`fixed z-50 flex flex-col w-full h-full bg-white/30 shadow-2-xl backdrop-blur-xl shadow-2xl transition-all duration-300 md:top-1/6 md:right-2 md:h-1/2 md:w-fit md:rounded-2xl md:border md:border-white/30 md:bg-white/30 md:shadow-[0_8px_32px_rgba(0,0,0,0.1)] ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-        }`}>
-        {/* 头部 */}
-        <div className="flex items-center justify-between p-5">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <Settings className="w-5 h-5 text-white" />
-            设置
-          </h2>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-white"
+    <div
+      className={`fixed inset-0 z-50 flex flex-col w-full h-full border-white/15 bg-[#1e1640]/85 backdrop-blur-2xl shadow-2xl transition-all duration-300 md:inset-auto md:top-1/2 md:-translate-y-1/2 md:right-4 md:w-90 md:h-[60vh] md:max-h-[60vh] md:rounded-2xl md:border ${
+        isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+      }`}
+    >
+      {/* 头部 */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0">
+        <h2 className="text-base font-semibold text-white flex items-center gap-2">
+          <Settings className="w-4 h-4 text-purple-400" />
+          对话设置
+        </h2>
+        <button onClick={onClose} className="rounded-lg p-1.5 text-white/50 hover:bg-white/10 hover:text-white transition-colors">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* 内容 */}
+      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6 custom-scrollbar-thin">
+        {/* 1. API 厂商 */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-medium text-white/80">API 厂商</span>
+            <Tooltip content="选择大模型服务提供商">
+              <HelpCircle className="w-3.5 h-3.5 text-white/30 cursor-help" />
+            </Tooltip>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {providerKeys.map((key) => (
+              <button
+                key={key}
+                onClick={() => handleProviderChange(key)}
+                className={`rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                  settings.provider === key
+                    ? 'bg-purple-500/30 text-white ring-1 ring-purple-400/50'
+                    : 'bg-white/8 text-white/50 hover:bg-white/12 hover:text-white/70'
+                }`}
+              >
+                {providers[key].label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. 模型选择 */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-medium text-white/80">模型</span>
+            <Tooltip content={`${currentProvider.name} 提供的模型`}>
+              <HelpCircle className="w-3.5 h-3.5 text-white/30 cursor-help" />
+            </Tooltip>
+          </div>
+          <div className="relative">
+            <select
+              value={activeModel}
+              onChange={(e) => updateSettings({ model: e.target.value })}
+              className="w-full appearance-none rounded-lg border border-white/12 bg-white/8 text-white/90 py-2.5 px-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition-shadow"
+            >
+              {currentModels.map((m) => (
+                <option key={m.value} value={m.value} className="bg-zinc-800 text-white">
+                  {m.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* 3. 流式响应 */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-medium text-white/80">流式响应</span>
+            <Tooltip content="实时逐字输出 AI 回复">
+              <HelpCircle className="w-3.5 h-3.5 text-white/30 cursor-help" />
+            </Tooltip>
+          </div>
+          <button
+            role="switch"
+            aria-checked={settings.stream}
+            onClick={() => updateSettings({ stream: !settings.stream })}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              settings.stream ? 'bg-purple-500' : 'bg-white/15'
+            }`}
           >
-            <X className="w-5 h-5" />
+            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${settings.stream ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
           </button>
         </div>
 
-        {/* 内容区域 (可滚动) */}
-        <div className="flex-1 overflow-y-auto px-2 pt-2 pb-5 space-y-6 h-full      [&::-webkit-scrollbar]:w-1
-            [&::-webkit-scrollbar-track]:bg-none
-            [&::-webkit-scrollbar-thumb]:bg-gray-700
-            [&::-webkit-scrollbar-thumb]:rounded 
-            [&::-webkit-scrollbar-thumb:hover]:bg-gray-400">
-          
-          {/* 1. 模型选择 */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-              Model
-              <Tooltip content="选择要使用的 LLM 模型">
-                <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-              </Tooltip>
-            </label>
-            <div className="relative">
-              <select
-                value={settings.model}
-                onChange={(e) => updateSettings({ model: e.target.value })}
-                className="w-full appearance-none bg-white border border-gray-300 text-gray-700 py-2.5 px-3 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow text-sm"
-              >
-                {modelOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* 2. 流式响应 */}
+        {/* 4. API Key */}
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-medium text-gray-700">流式响应</span>
-              <Tooltip content="开启后将流式输出 AI 的回复">
-                <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+              <span className="text-sm font-medium text-white/80">API Key</span>
+              <Tooltip content={`用于 ${currentProvider.name} 的身份验证`}>
+                <HelpCircle className="w-3.5 h-3.5 text-white/30 cursor-help" />
               </Tooltip>
             </div>
-            {/* 自定义 Switch */}
-            <button
-              role="switch"
-              aria-checked={settings.stream}
-              onClick={() => updateSettings({ stream: !settings.stream })}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                settings.stream ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.stream ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
+            <a href={providerKeyLinks[settings.provider] || providerKeyLinks.siliconflow} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1">
+              获取 Key <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+          <div className="relative">
+            <input
+              type={showApiKey ? 'text' : 'password'}
+              value={settings.apiKey}
+              onChange={(e) => updateSettings({ apiKey: e.target.value })}
+              placeholder="sk-..."
+              className="w-full rounded-lg border border-white/12 bg-white/8 text-white/90 py-2.5 px-3 pr-10 text-sm placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+            />
+            <button type="button" onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60">
+              {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+          <p className="text-xs text-white/30">Key 仅保存在本地浏览器中</p>
+        </div>
 
-          {/* 3. API Key */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-medium text-gray-700">API Key</span>
-                <Tooltip content="您的 SiliconFlow API Key">
-                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-                </Tooltip>
-              </div>
-              <a 
-                href="https://cloud.siliconflow.cn/account/ak" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium"
-              >
-                获取 Key <ExternalLink className="w-3 h-3" />
-              </a>
+        {/* 5. Max Tokens */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium text-white/80">Max Tokens</span>
+              <Tooltip content="生成文本的最大长度">
+                <HelpCircle className="w-3.5 h-3.5 text-white/30 cursor-help" />
+              </Tooltip>
             </div>
-            <div className="relative">
-              <input
-                type={showApiKey ? 'text' : 'password'}
-                value={settings.apiKey}
-                onChange={(e) => updateSettings({ apiKey: e.target.value })}
-                placeholder="sk-..."
-                className="w-full bg-white border border-gray-300 text-gray-700 py-2.5 px-3 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => setShowApiKey(!showApiKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            <p className="text-xs text-gray-400">Key 仅保存在本地浏览器中</p>
+            <span className="text-xs font-mono text-purple-400 bg-purple-500/15 px-2 py-0.5 rounded-md">{settings.maxTokens}</span>
           </div>
-
-          {/* 4. Max Tokens */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-medium text-gray-700">Max Tokens</span>
-                <Tooltip content="生成文本的最大长度">
-                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-                </Tooltip>
-              </div>
-              <span className="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                {settings.maxTokens}
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                min="1"
-                max={currentMaxTokens}
-                step="1"
-                value={settings.maxTokens}
-                onChange={(e) => updateSettings({ maxTokens: parseInt(e.target.value) })}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              />
-              <input
-                type="number"
-                min="1"
-                max={currentMaxTokens}
-                value={settings.maxTokens}
-                onChange={(e) => updateSettings({ maxTokens: Math.min(Math.max(1, parseInt(e.target.value) || 1), currentMaxTokens) })}
-                className="w-20 bg-white border border-gray-300 text-gray-700 text-sm rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
-              />
-            </div>
-            <div className="text-xs text-gray-400 text-right">
-              最大限制: {currentMaxTokens}
-            </div>
+          <div className="flex items-center gap-3">
+            <RangeSlider
+              value={settings.maxTokens}
+              min={1}
+              max={currentMaxTokens}
+              step={1}
+              onChange={(e) => updateSettings({ maxTokens: parseInt(e.target.value) })}
+            />
+            <input type="number" min="1" max={currentMaxTokens}
+              value={settings.maxTokens}
+              onChange={(e) => updateSettings({ maxTokens: Math.min(Math.max(1, parseInt(e.target.value) || 1), currentMaxTokens) })}
+              className="w-20 rounded-lg border border-white/12 bg-white/8 text-white/90 text-sm py-1.5 px-2 text-center focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+            />
           </div>
+          <p className="text-xs text-white/30 text-right">最大: {currentMaxTokens}</p>
+        </div>
 
-          {/* 5. Temperature */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-medium text-gray-700">Temperature</span>
-                <Tooltip content="值越高，回答越随机 (0-2)">
-                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-                </Tooltip>
-              </div>
-              <span className="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                {settings.temperature.toFixed(1)}
-              </span>
+        {/* 6. Temperature */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium text-white/80">Temperature</span>
+              <Tooltip content="越高越随机，越低越确定 (0-2)">
+                <HelpCircle className="w-3.5 h-3.5 text-white/30 cursor-help" />
+              </Tooltip>
             </div>
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                min="0"
-                max="2"
-                step="0.1"
-                value={settings.temperature}
-                onChange={(e) => updateSettings({ temperature: parseFloat(e.target.value) })}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              />
-              <input
-                type="number"
-                min="0"
-                max="2"
-                step="0.1"
-                value={settings.temperature}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  if (!isNaN(val)) {
-                    updateSettings({ temperature: Math.min(Math.max(0, val), 2) });
-                  }
-                }}
-                className="w-20 bg-white border border-gray-300 text-gray-700 text-sm rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
-              />
-            </div>
+            <span className="text-xs font-mono text-purple-400 bg-purple-500/15 px-2 py-0.5 rounded-md">{settings.temperature.toFixed(1)}</span>
           </div>
-
-          {/* 6. Top-P */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-medium text-gray-700">Top-P</span>
-                <Tooltip content="核采样阈值 (0-1)">
-                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-                </Tooltip>
-              </div>
-              <span className="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                {settings.topP.toFixed(1)}
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={settings.topP}
-                onChange={(e) => updateSettings({ topP: parseFloat(e.target.value) })}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              />
-              <input
-                type="number"
-                min="0"
-                max="1"
-                step="0.1"
-                value={settings.topP}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  if (!isNaN(val)) {
-                    updateSettings({ topP: Math.min(Math.max(0, val), 1) });
-                  }
-                }}
-                className="w-20 bg-white border border-gray-300 text-gray-700 text-sm rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
-              />
-            </div>
+          <div className="flex items-center gap-3">
+            <RangeSlider
+              value={settings.temperature}
+              min={0} max={2} step={0.1}
+              onChange={(e) => updateSettings({ temperature: parseFloat(e.target.value) })}
+            />
+            <input type="number" min="0" max="2" step="0.1" value={settings.temperature}
+              onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) updateSettings({ temperature: Math.min(Math.max(0, v), 2) }); }}
+              className="w-20 rounded-lg border border-white/12 bg-white/8 text-white/90 text-sm py-1.5 px-2 text-center focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+            />
           </div>
+        </div>
 
-          {/* 7. Top-K */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-medium text-gray-700">Top-K</span>
-                <Tooltip content="保留概率最高的 K 个词 (1-100)">
-                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-                </Tooltip>
-              </div>
-              <span className="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                {settings.topK}
-              </span>
+        {/* 7. Top-P */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium text-white/80">Top-P</span>
+              <Tooltip content="核采样阈值 (0-1)">
+                <HelpCircle className="w-3.5 h-3.5 text-white/30 cursor-help" />
+              </Tooltip>
             </div>
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                min="1"
-                max="100"
-                step="1"
-                value={settings.topK}
-                onChange={(e) => updateSettings({ topK: parseInt(e.target.value) })}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              />
-              <input
-                type="number"
-                min="1"
-                max="100"
-                step="1"
-                value={settings.topK}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value);
-                  if (!isNaN(val)) {
-                    updateSettings({ topK: Math.min(Math.max(1, val), 100) });
-                  }
-                }}
-                className="w-20 bg-white border border-gray-300 text-gray-700 text-sm rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
-              />
-            </div>
+            <span className="text-xs font-mono text-purple-400 bg-purple-500/15 px-2 py-0.5 rounded-md">{settings.topP.toFixed(1)}</span>
           </div>
+          <div className="flex items-center gap-3">
+            <RangeSlider
+              value={settings.topP}
+              min={0} max={1} step={0.1}
+              onChange={(e) => updateSettings({ topP: parseFloat(e.target.value) })}
+            />
+            <input type="number" min="0" max="1" step="0.1" value={settings.topP}
+              onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) updateSettings({ topP: Math.min(Math.max(0, v), 1) }); }}
+              className="w-20 rounded-lg border border-white/12 bg-white/8 text-white/90 text-sm py-1.5 px-2 text-center focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+            />
+          </div>
+        </div>
 
+        {/* 8. Top-K */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium text-white/80">Top-K</span>
+              <Tooltip content="保留概率最高的 K 个词 (1-100)">
+                <HelpCircle className="w-3.5 h-3.5 text-white/30 cursor-help" />
+              </Tooltip>
+            </div>
+            <span className="text-xs font-mono text-purple-400 bg-purple-500/15 px-2 py-0.5 rounded-md">{settings.topK}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <RangeSlider
+              value={settings.topK}
+              min={1} max={100} step={1}
+              onChange={(e) => updateSettings({ topK: parseInt(e.target.value) })}
+            />
+            <input type="number" min="1" max="100" step="1" value={settings.topK}
+              onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v)) updateSettings({ topK: Math.min(Math.max(1, v), 100) }); }}
+              className="w-20 rounded-lg border border-white/12 bg-white/8 text-white/90 text-sm py-1.5 px-2 text-center focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+            />
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
-};
-
-export default SettingsPanel;
+}

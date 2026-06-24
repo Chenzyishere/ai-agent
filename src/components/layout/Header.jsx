@@ -4,6 +4,7 @@ import { Settings, History, X, Menu, Moon, Sun, Home } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { Avatar, Dropdown, message } from 'antd';
+import { ConfirmDialog } from '@/components/ui/DialogEdit';
 import {
   UserOutlined,
   LogoutOutlined,
@@ -28,14 +29,19 @@ const Header = ({
   const isLoginPage = location.pathname === '/login';
   const isHomePage = location.pathname === '/';
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   // ==================== 工具函数 ====================
 
   const handleLogout = () => {
-    if (window.confirm('确定退出登录?')) {
-      logout();
-      message.success('已安全退出');
-      navigate('/login');
-    }
+    setShowLogoutConfirm(true);
+  };
+
+  const doLogout = () => {
+    setShowLogoutConfirm(false);
+    logout();
+    message.success('已安全退出');
+    navigate('/login');
   };
 
   const getActualBgColor = (element) => {
@@ -172,6 +178,7 @@ const Header = ({
   const HeaderisVisible = isVisible ? 'translate-y-0' : '-translate-y-full';
 
   return (
+    <>
     <header
       className={`fixed top-0 right-0 left-0 z-50 transition-transform duration-300 ease-in-out ${HeaderisVisible}`}
     >
@@ -415,7 +422,17 @@ const Header = ({
         </div>
       </div>
     </header>
-  );
+
+    <ConfirmDialog
+      visible={showLogoutConfirm}
+      title="退出登录"
+      onCancel={() => setShowLogoutConfirm(false)}
+      onConfirm={doLogout}
+    >
+      确定要退出登录吗？
+    </ConfirmDialog>
+  </>
+);
 };
 
 export default Header;
