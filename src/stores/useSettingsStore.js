@@ -108,6 +108,47 @@ export const providers = {
   },
 };
 
+export const backgroundPresets = {
+  aurora: {
+    label: '极光紫',
+    gradient: 'from-black via-purple-900 to-blue-800',
+    glow1: 'bg-purple-600/20',
+    glow2: 'bg-blue-600/10',
+  },
+  sakura: {
+    label: '樱花粉',
+    gradient: 'from-black via-pink-800 to-blue-800',
+    glow1: 'bg-pink-500/20',
+    glow2: 'bg-purple-500/10',
+  },
+  ocean: {
+    label: '深海蓝',
+    gradient: 'from-black via-blue-900 to-cyan-800',
+    glow1: 'bg-blue-500/20',
+    glow2: 'bg-cyan-400/10',
+  },
+  midnight: {
+    label: '暗夜黑',
+    gradient: 'from-black via-neutral-900 to-zinc-900',
+    glow1: 'bg-white/5',
+    glow2: 'bg-white/3',
+  },
+  sunset: {
+    label: '日落橙',
+    gradient: 'from-black via-orange-900 to-rose-800',
+    glow1: 'bg-orange-500/20',
+    glow2: 'bg-rose-400/10',
+  },
+  forest: {
+    label: '翡翠绿',
+    gradient: 'from-black via-emerald-900 to-teal-800',
+    glow1: 'bg-emerald-500/20',
+    glow2: 'bg-teal-400/10',
+  },
+};
+
+export const backgroundKeys = Object.keys(backgroundPresets);
+
 export const providerKeys = Object.keys(providers);
 
 export const providerKeyLinks = {
@@ -124,6 +165,7 @@ export const useSettingsStore = create(
       settings: {
         provider: 'siliconflow',
         model: 'deepseek-ai/DeepSeek-R1',
+        background: 'aurora',
         apiKey: '',
         stream: true,
         maxTokens: 4096,

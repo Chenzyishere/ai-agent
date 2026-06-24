@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 import Header from '@/components/layout/Header';
+import ThemeBackground from '@/components/ui/ThemeBackground';
 import {
   Form,
   Input,
@@ -59,13 +60,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative w-full h-dvh overflow-hidden bg-black">
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 animate-[gradient-flow_8s_ease_infinite] bg-linear-to-r from-purple-900 via-slate-900 to-black bg-[length:200%_200%]"
-      >
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-purple-600/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-600/10 rounded-full blur-[120px]" />
-      </div>
+      <ThemeBackground />
 
       <div className="relative z-10 flex flex-col h-dvh">
         <Header />

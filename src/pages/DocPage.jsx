@@ -12,6 +12,7 @@ import {
   Eye,
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
+import ThemeBackground from '@/components/ui/ThemeBackground';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -205,13 +206,7 @@ export default function DocPage() {
   return (
     <div className="relative w-full h-dvh overflow-hidden bg-black">
       {/* 统一背景 */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 animate-[gradient-flow_8s_ease_infinite] bg-linear-to-r from-purple-900 via-slate-900 to-black bg-[length:200%_200%]"
-      >
-        <div className="absolute top-[-10%] left-[-10%] h-[50vw] w-[50vw] rounded-full bg-purple-600/20 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[50vw] w-[50vw] rounded-full bg-blue-600/10 blur-[120px]" />
-      </div>
+      <ThemeBackground />
 
       <div className="relative z-10 flex flex-col h-dvh">
         <Header />

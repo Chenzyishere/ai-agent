@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useSettingsStore, providers, providerKeys, providerKeyLinks } from '@/stores/useSettingsStore';
+import { useSettingsStore, providers, providerKeys, providerKeyLinks, backgroundPresets, backgroundKeys } from '@/stores/useSettingsStore';
 import { X, Settings, HelpCircle, ExternalLink, Eye, EyeOff, ChevronDown } from 'lucide-react';
 
 const Tooltip = ({ content, children }) => {
@@ -137,6 +137,31 @@ export default function SettingsPanel({ isOpen, onClose }) {
               ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* 背景主题 */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-medium text-white/80">背景主题</span>
+            <Tooltip content="选择全局背景氛围">
+              <HelpCircle className="w-3.5 h-3.5 text-white/30 cursor-help" />
+            </Tooltip>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {backgroundKeys.map((key) => (
+              <button
+                key={key}
+                onClick={() => updateSettings({ background: key })}
+                className={`rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                  settings.background === key
+                    ? 'bg-purple-500/30 text-white ring-1 ring-purple-400/50'
+                    : 'bg-white/8 text-white/50 hover:bg-white/12 hover:text-white/70'
+                }`}
+              >
+                {backgroundPresets[key].label}
+              </button>
+            ))}
           </div>
         </div>
 

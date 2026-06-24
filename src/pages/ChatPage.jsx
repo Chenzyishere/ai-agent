@@ -14,6 +14,7 @@ import { useChatStore } from '@/stores/useChatStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { messageHandler } from '@/utils/messageHandler';
 import { createChatCompletion } from '@/services/api';
+import ThemeBackground from '@/components/ui/ThemeBackground';
 
 export default function ChatPage() {
   const conversations = useChatStore((s) => s.conversations);
@@ -164,10 +165,7 @@ export default function ChatPage() {
 
   return (
     <>
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 animate-[gradient-flow_8s_ease_infinite] bg-linear-to-r from-black via-pink-800 to-blue-800 bg-size-[200%_500%] filter"
-      ></div>
+      <ThemeBackground />
       <div className="relative z-10 flex h-dvh w-full flex-col overflow-hidden">
         <Header
           isSettingsOpen={isSettingsOpen}
