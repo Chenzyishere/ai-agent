@@ -122,11 +122,11 @@ const ChatInput = ({ loading, onSend }) => {
   return (
     <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-20 w-5xl max-w-full rounded-3xl border border-white/30 bg-white/30 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300">
       {/* 输入框 */}
-      <label htmlFor="chat-input" className="sr-only">
+      <label htmlFor="tour-chat-input" className="sr-only">
         输入消息
       </label>
       <textarea
-        id="chat-input"
+        id="tour-chat-input"
         value={inputValue}
         onChange={(e)=>setInputValue(e.target.value)}
         placeholder="输入消息,Enter发送,Shift+Enter换行,最大行数为6"

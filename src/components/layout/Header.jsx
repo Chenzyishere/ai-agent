@@ -276,6 +276,7 @@ const Header = ({
                     isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'
                   }`}
                   aria-label="Toggle Theme"
+                  id="tour-theme-btn"
                 >
                   {theme === 'light' ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
@@ -288,6 +289,7 @@ const Header = ({
                       : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'}`
                   }`}
                   aria-label="History"
+                  id="tour-history-btn"
                 >
                   <History
                     className={`h-5 w-5 ${isHistoryOpen ? 'animate-spin-slow' : ''}`}
@@ -304,6 +306,7 @@ const Header = ({
                       : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'}`
                   }`}
                   aria-label="Settings"
+                  id="tour-settings-btn"
                 >
                   <Settings
                     className={`h-5 w-5 ${isSettingsOpen ? 'animate-spin-slow' : ''}`}

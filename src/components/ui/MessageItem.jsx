@@ -182,7 +182,7 @@ const MessageItem = ({ message, isLastAssistantMessage = false, onRegenerate }) 
 
             {/* AI 消息操作栏 */}
             {isAssistant && !safeMessage.loading && (
-              <div className="mt-2.5 flex items-center gap-0.5 border-t border-white/10 pt-2.5">
+              <div className="mt-2.5 flex items-center gap-0.5 border-t border-white/10 pt-2.5" data-tour="message-actions">
                 {isLastAssistantMessage && (
                   <ActionBtn onClick={handleRegenerateClick} title="重新生成">
                     <ReloadOutlined />
