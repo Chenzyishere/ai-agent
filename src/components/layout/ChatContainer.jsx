@@ -6,30 +6,45 @@ export default function ChatContainer({ messages, onRegenerate, containerRef }) 
     return (
       <div ref={containerRef} className="flex-1 overflow-y-auto flex items-center justify-center text-gray-400">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">开始新的对话</h2>
-          <p>发送消息以获取帮助</p>
+          <h2 className="text-xl font-semibold mb-2 text-white/80">开始新的对话</h2>
+          <p className="text-white/40">发送消息以获取帮助</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="pt-20 pb-30 flex-1 overflow-y-auto px-4 py-6 custom-scrollbar-thin">
-      {messages.map((msg, index) => {
-        const isLastAssistant = 
-          msg.role === 'assistant' && 
-          index === messages.length - 1 && 
-          !msg.loading; // 只有非加载状态的最后一条 AI 消息才能重生成
+    <div className="relative flex-1 min-h-0">
+      <div
+        ref={containerRef}
+        className="relative h-full overflow-y-auto px-4 pt-4 pb-30 custom-scrollbar-thin"
+      >
+        {/* 顶部 sticky 模糊 */}
+        <div
+          aria-hidden="true"
+        className="pointer-events-none fixed top-0 left-0 right-0 z-15 h-36 backdrop-blur [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_45%,transparent)] mask-[linear-gradient(to_bottom,black_0%,black_45%,transparent)]"
+        />
+        {messages.map((msg, index) => {
+          const isLastAssistant =
+            msg.role === 'assistant' &&
+            index === messages.length - 1 &&
+            !msg.loading;
 
-        return (
-          <MessageItem
-            key={msg.id || index}
-            message={msg}
-            isLastAssistantMessage={isLastAssistant}
-            onRegenerate={onRegenerate} // 直接透传 Page 提供的 handler
-          />
-        );
-      })}
+          return (
+            <MessageItem
+              key={msg.id}
+              message={msg}
+              isLastAssistantMessage={isLastAssistant}
+              onRegenerate={onRegenerate}
+            />
+          );
+        })}
+      </div>
+      {/* 底部 fixed 模糊 — 贴合视窗底部 */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed bottom-0 left-0 right-0 z-15 h-36 backdrop-blur [-webkit-mask-image:linear-gradient(to_top,black_0%,black_70%,transparent)] mask-[linear-gradient(to_top,black_0%,black_70%,transparent)]"
+      />
     </div>
   );
 }

@@ -70,7 +70,7 @@ export const messageHandler = {
   //   处理流式响应
   async handleStreamResponse(response, updateCallback) {
     if (!response || !response.body) {
-      console.log(
+      console.error(
         'handleStreamResponse,Response or response.body is undefined',
         response,
       );

@@ -116,21 +116,15 @@ export const useAuthStore = create(
         const state = get();
         // 如果没有token，直接认为未登录
         if(!state.token){
-            console.log('没有token，未登录');
             set({isAuthenticated:false});
             return false;
         }
 
-        // 模拟校验Token有效性的延迟
         await new Promise((resolve) => setTimeout(resolve,300));
-        // 只要token是以mock_jwt_开头，就认为有效
         if(state.token.startsWith('mock_jwt_')){
-            console.log('token以mock_jwt_开始，已登录');
             set({isAuthenticated:true});
             return true;
         }else {
-            // Token无效，强制登出
-            console.log('token无效，已登出');
             get().logout();
             return false;
         }

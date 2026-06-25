@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Settings, History, X, Menu,Moon,Sun } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Settings, History, X, Menu, Moon, Sun, Home } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
-import { Layout, Avatar, Dropdown, Space, message } from 'antd';
+import { Avatar, Dropdown, message } from 'antd';
+import { ConfirmDialog } from '@/components/ui/DialogEdit';
 import {
   UserOutlined,
   LogoutOutlined,
   DashboardOutlined,
 } from '@ant-design/icons';
 const Header = ({
-  isSettingsOpen,
-  isHistoryOpen,
+  isSettingsOpen = false,
+  isHistoryOpen = false,
   toggleSettings,
   toggleHistory,
 }) => {
@@ -24,15 +25,23 @@ const Header = ({
 
   const lastScrollYRef = useRef(0);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isLoginPage = location.pathname === '/login';
+  const isHomePage = location.pathname === '/';
+
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // ==================== 工具函数 ====================
 
   const handleLogout = () => {
-    if (window.confirm('确定退出登录?')) {
-      logout();
-      message.success('已安全退出');
-      navigate('/login');
-    }
+    setShowLogoutConfirm(true);
+  };
+
+  const doLogout = () => {
+    setShowLogoutConfirm(false);
+    logout();
+    message.success('已安全退出');
+    navigate('/login');
   };
 
   const getActualBgColor = (element) => {
@@ -78,8 +87,6 @@ const Header = ({
     // 1. 检测背景颜色
     if (!isMobileMenuOpen) {
       const sampleY = currentScrollY + 10;
-      console.log(sampleY);
-      
       if (sampleY < document.documentElement.scrollHeight) {
         const element = document.elementFromPoint(
           window.innerWidth / 2,
@@ -136,10 +143,17 @@ const Header = ({
 
   const dropdownItems = [
     {
+      key: 'username',
+      label: user?.displayName || user?.username || '访客',
+      icon: <UserOutlined />,
+      disabled: true,
+    },
+    { type: 'divider' },
+    {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: '退出登录',
-      danger: true, // 红色文字，表示危险操作
+      danger: true,
       onClick: handleLogout,
     },
   ];
@@ -164,6 +178,7 @@ const Header = ({
   const HeaderisVisible = isVisible ? 'translate-y-0' : '-translate-y-full';
 
   return (
+    <>
     <header
       className={`fixed top-0 right-0 left-0 z-50 transition-transform duration-300 ease-in-out ${HeaderisVisible}`}
     >
@@ -212,20 +227,21 @@ const Header = ({
                   <Dropdown
                     menu={{ items: dropdownItems }}
                     placement="bottomRight"
+                    trigger={['hover']}
                     arrow
                   >
-                    <Space className="cursor-pointer rounded-lg p-2 transition-colors hover:bg-gray-50">
-                      {/* 用户头像 */}
+                    <button
+                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                        isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
                       <Avatar
                         src={user?.avatar}
                         icon={!user?.avatar && <UserOutlined />}
+                        size="small"
                         className="bg-blue-500"
                       />
-                      {/* 用户名 */}
-                      <span className="hidden font-medium text-gray-700 sm:inline-block">
-                        {user?.displayName || user?.username || '访客'}
-                      </span>
-                    </Space>
+                    </button>
                   </Dropdown>
                 )}
                 {!isAuthenticated && (
@@ -240,13 +256,27 @@ const Header = ({
                     登录
                   </Link>
                 )}
+                {!isHomePage && (
+                  <Link
+                    to="/"
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                      isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    }`}
+                    aria-label="主页"
+                  >
+                    <Home size={20} />
+                  </Link>
+                )}
                 <button
                   onClick={toggleTheme}
-                  className="rounded-full bg-gray-200 p-2 text-gray-800 transition-all hover:scale-110 dark:bg-white/10 dark:text-yellow-300"
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                    isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  }`}
                   aria-label="Toggle Theme"
                 >
                   {theme === 'light' ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
+                {toggleHistory && (
                 <button
                   onClick={toggleHistory}
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
@@ -259,9 +289,10 @@ const Header = ({
                   <History
                     className={`h-5 w-5 ${isHistoryOpen ? 'animate-spin-slow' : ''}`}
                   />
-                  <span className="hidden lg:inline">历史记录</span>
                 </button>
+                )}
 
+                {toggleSettings && (
                 <button
                   onClick={toggleSettings}
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
@@ -274,8 +305,8 @@ const Header = ({
                   <Settings
                     className={`h-5 w-5 ${isSettingsOpen ? 'animate-spin-slow' : ''}`}
                   />
-                  <span className="hidden lg:inline">设置</span>
                 </button>
+                )}
               </div>
 
               {/* 移动端菜单按钮 (仅 md 以下显示) */}
@@ -301,34 +332,41 @@ const Header = ({
              3. z-[9999] 确保层级最高。
           */}
           <div
-            className={`absolute top-full right-0 left-0 z-50 mx-2 mt-2 origin-top overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl transition-all duration-300 ease-in-out sm:mx-4 md:hidden ${
+            className={`absolute top-full right-0 left-0 z-50 mx-2 mt-2 origin-top overflow-hidden rounded-2xl border border-white/10 bg-[#1a1030]/95 shadow-2xl backdrop-blur-2xl transition-all duration-300 ease-in-out sm:mx-4 md:hidden ${
               isMobileMenuOpen
                 ? 'visible max-h-96 scale-100 opacity-100'
                 : 'invisible max-h-0 scale-95 opacity-0'
-            } border-none bg-amber-50`}
+            }`}
           >
             <div className="flex flex-col space-y-1 p-4">
+              {/* 返回主页 (移动端) */}
+              {!isHomePage && (
+                <Link
+                  to="/"
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium text-white/80 transition-colors duration-200 hover:bg-white/10 hover:text-white"
+                >
+                  <Home className="h-5 w-5" />
+                  返回主页
+                </Link>
+              )}
+
               {/* 导航链接 */}
               {navItems.map((item) => (
                 <Link
                   key={item.label}
                   to={item.to}
                   onClick={closeMobileMenu}
-                  className={`block rounded-xl px-4 py-3 text-base font-medium transition-colors duration-200 ${
-                    isLightBg
-                      ? 'text-gray-800 hover:bg-gray-900/5'
-                      : 'text-white hover:bg-white/10'
-                  }`}
+                  className="block rounded-xl px-4 py-3 text-base font-medium text-white/80 transition-colors duration-200 hover:bg-white/10 hover:text-white"
                 >
                   {item.label}
                 </Link>
               ))}
 
-              <div
-                className={`my-2 h-px ${isLightBg ? 'bg-gray-900/10' : 'bg-white/10'}`}
-              ></div>
+              <div className="my-2 h-px bg-white/10"></div>
 
               {/* 功能按钮 */}
+              {toggleHistory && (
               <button
                 onClick={() => {
                   toggleHistory();
@@ -336,14 +374,16 @@ const Header = ({
                 }}
                 className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-200 ${
                   isHistoryOpen
-                    ? 'bg-white/20 text-white shadow-inner'
-                    : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/5' : 'text-white/80 hover:bg-white/10'}`
+                    ? 'bg-purple-500/20 text-white'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <History className="h-5 w-5" />
                 历史记录
               </button>
+              )}
 
+              {toggleSettings && (
               <button
                 onClick={() => {
                   toggleSettings();
@@ -351,32 +391,48 @@ const Header = ({
                 }}
                 className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-200 ${
                   isSettingsOpen
-                    ? 'bg-white/20 text-white shadow-inner'
-                    : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/5' : 'text-white/80 hover:bg-white/10'}`
+                    ? 'bg-purple-500/20 text-white'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <Settings className="h-5 w-5" />
                 设置
               </button>
+              )}
 
-              <button
-                onClick={() => {
-                  closeMobileMenu();
-                }}
-                className={`mt-2 w-full rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
-                  isLightBg
-                    ? 'bg-gray-900 text-white hover:bg-gray-800'
-                    : 'bg-white text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                登录 / 注册
-              </button>
+              {isLoginPage ? (
+                <Link
+                  to="/"
+                  onClick={closeMobileMenu}
+                  className="mt-2 block w-full rounded-xl py-3 text-center text-sm font-bold text-white bg-linear-to-r from-purple-500 to-blue-500 transition-all duration-200 hover:from-purple-600 hover:to-blue-600 shadow-lg shadow-purple-500/25"
+                >
+                  返回主页
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={closeMobileMenu}
+                  className="mt-2 block w-full rounded-xl py-3 text-center text-sm font-bold text-white bg-linear-to-r from-purple-500 to-blue-500 transition-all duration-200 hover:from-purple-600 hover:to-blue-600 shadow-lg shadow-purple-500/25"
+                >
+                  登录 / 注册
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </div>
     </header>
-  );
+
+    <ConfirmDialog
+      visible={showLogoutConfirm}
+      title="退出登录"
+      onCancel={() => setShowLogoutConfirm(false)}
+      onConfirm={doLogout}
+    >
+      确定要退出登录吗？
+    </ConfirmDialog>
+  </>
+);
 };
 
 export default Header;
