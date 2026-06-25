@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Settings, History, X, Menu, Moon, Sun, Home } from 'lucide-react';
+import { Settings, History, X, Menu, Moon, Sun, Home, ChevronUp, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { Avatar, Dropdown, message } from 'antd';
@@ -15,6 +15,7 @@ const Header = ({
   isHistoryOpen = false,
   toggleSettings,
   toggleHistory,
+  collapsible = false,
 }) => {
   const { user, logout } = useAuthStore();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -22,6 +23,7 @@ const Header = ({
   const [isLightBg, setIsLightBg] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const lastScrollYRef = useRef(0);
   const navigate = useNavigate();
@@ -175,7 +177,8 @@ const Header = ({
 
   const underlineColorClass = isLightBg ? 'bg-gray-900' : 'bg-white';
 
-  const HeaderisVisible = isVisible ? 'translate-y-0' : '-translate-y-full';
+  const headerShown = collapsible ? (!isCollapsed && isVisible) : isVisible;
+  const HeaderisVisible = headerShown ? 'translate-y-0' : '-translate-y-full';
 
   return (
     <>
@@ -273,6 +276,7 @@ const Header = ({
                     isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'
                   }`}
                   aria-label="Toggle Theme"
+                  id="tour-theme-btn"
                 >
                   {theme === 'light' ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
@@ -285,6 +289,7 @@ const Header = ({
                       : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'}`
                   }`}
                   aria-label="History"
+                  id="tour-history-btn"
                 >
                   <History
                     className={`h-5 w-5 ${isHistoryOpen ? 'animate-spin-slow' : ''}`}
@@ -301,11 +306,24 @@ const Header = ({
                       : `${isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'}`
                   }`}
                   aria-label="Settings"
+                  id="tour-settings-btn"
                 >
                   <Settings
                     className={`h-5 w-5 ${isSettingsOpen ? 'animate-spin-slow' : ''}`}
                   />
                 </button>
+                )}
+                {collapsible && (
+                  <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                      isLightBg ? 'text-gray-700 hover:bg-gray-900/10' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    }`}
+                    aria-label={isCollapsed ? '展开顶栏' : '收起顶栏'}
+                    title={isCollapsed ? '展开顶栏' : '收起顶栏'}
+                  >
+                    <ChevronUp className={`h-5 w-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} />
+                  </button>
                 )}
               </div>
 
@@ -422,6 +440,18 @@ const Header = ({
         </div>
       </div>
     </header>
+
+    {/* 收起时的小按钮 */}
+    {collapsible && isCollapsed && (
+      <button
+        onClick={() => setIsCollapsed(false)}
+        className="fixed top-3 left-1/2 z-50 -translate-x-1/2 flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium bg-black/40 backdrop-blur-xl text-white/70 border border-white/10 shadow-lg transition-all hover:text-white hover:bg-black/60 hover:border-white/20"
+        aria-label="展开顶栏"
+      >
+        <ChevronDown className="h-4 w-4" />
+        <span>展开顶栏</span>
+      </button>
+    )}
 
     <ConfirmDialog
       visible={showLogoutConfirm}

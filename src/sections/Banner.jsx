@@ -31,12 +31,14 @@ export default function Banner() {
         <p className="mt-4 max-w-md text-base text-white/70 sm:text-lg lg:text-xl">
           知微AI，你的智能对话伙伴
         </p>
-        <GradientButton size="large" className="mt-8 w-fit">
-          <Link to="/chat">马上开始</Link>
-        </GradientButton>
+        <div id="tour-start-btn">
+          <GradientButton size="large" className="mt-8 w-fit">
+            <Link to="/chat">马上开始</Link>
+          </GradientButton>
+        </div>
       </div>
 
-      <div className="absolute top-1/2 right-0 z-10 hidden h-1/2 w-1/2 -translate-y-1/2 cursor-grab md:block">
+      <div id="tour-model" className="absolute top-1/2 right-0 z-10 hidden h-1/2 w-1/2 -translate-y-1/2 cursor-grab md:block">
         <Suspense fallback={null}>
           <Robot3DCanvas lookTarget={lookTarget} />
         </Suspense>
