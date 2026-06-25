@@ -172,6 +172,7 @@ export default function ChatPage() {
           isHistoryOpen={isHistoryOpen}
           toggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
           toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
+          collapsible
         />
         <main id="main-content" className="relative flex flex-1 w-full justify-center min-h-0">
           <div className="flex flex-1 w-full flex-col max-w-7xl mx-auto min-h-0">

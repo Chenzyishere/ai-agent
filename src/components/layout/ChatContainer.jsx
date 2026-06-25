@@ -17,7 +17,7 @@ export default function ChatContainer({ messages, onRegenerate, containerRef }) 
     <div className="relative flex-1 min-h-0">
       <div
         ref={containerRef}
-        className="relative h-full overflow-y-auto px-4 pt-4 pb-30 custom-scrollbar-thin"
+        className="relative h-full overflow-y-auto px-4 pt-30 pb-30 custom-scrollbar-thin"
       >
         {/* 顶部 sticky 模糊 */}
         <div
